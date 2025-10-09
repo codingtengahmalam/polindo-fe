@@ -36,6 +36,8 @@ polindo-fe/
 - Avoid `any` type - use proper typing or `unknown`
 - Use type inference where obvious
 - Export types when they might be reused
+- **Always type API responses** - Define response types for all API calls
+- Use generic types with `useFetch<T>` and `useAsyncData<T>`
 
 ### Vue/Nuxt Best Practices
 - Use **Composition API** with `<script lang="ts" setup>` syntax
@@ -73,6 +75,30 @@ Organize `<script lang="ts" setup>` sections in this order:
 - **Constants**: UPPER_SNAKE_CASE
 - **Types/Interfaces**: PascalCase (prefix interfaces with `I` if needed for clarity)
 - **File names**: kebab-case for pages, PascalCase for components
+- **Type files**: kebab-case with `.d.ts` extension (e.g., `types/api.d.ts`, `types/blog.d.ts`)
+
+### Type Organization (types/ directory)
+- **Use `.d.ts` extension** - For type definition files
+- **Organize by domain/feature** - Group related types together
+- **API Response Types** - Always define response types for all API endpoints
+- **Naming Convention**:
+  - Entity types: `BlogPost`, `User`, `Comment`
+  - List response: `BlogPostListResponse`, `UserListResponse`
+  - Detail response: `BlogPostDetailResponse`, `UserDetailResponse`
+  - Create/Update: `CreateBlogPostRequest`, `UpdateUserRequest`
+  - Action response: `LikeResponse`, `CommentCreateResponse`
+- **Export all types** - Use named exports, avoid default exports
+- **Reusable types** - Create base types and extend when needed
+
+Example structure:
+```
+types/
+├── index.d.ts       # Global types & utilities
+├── api.d.ts         # API response types
+├── blog.d.ts        # Blog-related types
+├── user.d.ts        # User-related types
+└── common.d.ts      # Shared/common types
+```
 
 ### Accessibility
 - Always include proper ARIA labels
@@ -268,13 +294,19 @@ definePageMeta({
 </template>
 
 <script lang="ts" setup>
+import type { BlogPostDetailResponse } from '~/types/api'
+
 definePageMeta({
   layout: 'default'
 })
 
-// Fetch blog post data
+// Fetch blog post data with typed response
 const route = useRoute()
-const { data: post } = await useFetch(`/api/posts/${route.params.slug}`)
+const { data: response } = await useFetch<BlogPostDetailResponse>(
+  `/api/posts/${route.params.slug}`
+)
+
+const post = computed(() => response.value?.post)
 
 // SEO Meta tags
 useSeoMeta({
@@ -396,11 +428,55 @@ When providing code:
 
 ## Common Patterns
 
-### API Calls
-Use `useFetch` or `useAsyncData` for data fetching:
+### API Calls (Server-Side for SEO)
+**IMPORTANT**: For blog/SEO, always use Server-Side Rendering (SSR) for API calls.
+
+✅ **Recommended (SSR - Best for SEO)**:
 ```typescript
-const { data, pending, error } = await useFetch('/api/endpoint')
+// 1. Define response types in types/ directory (.d.ts files)
+import type { BlogPost, BlogPostListResponse, BlogPostDetailResponse } from '~/types/api'
+
+// 2. useFetch - Automatic SSR with typed response
+const { data, pending, error, refresh } = await useFetch<BlogPostListResponse>('/api/posts')
+
+// 3. useAsyncData - Custom SSR with typed response
+const { data: post } = await useAsyncData<BlogPostDetailResponse>(
+  'post-detail', // unique key
+  () => $fetch<BlogPostDetailResponse>(`/api/posts/${route.params.slug}`)
+)
+
+// 4. useLazyFetch - SSR but non-blocking (for below-the-fold content)
+const { data: comments } = await useLazyFetch<CommentListResponse>(`/api/posts/${id}/comments`)
 ```
+
+⚠️ **Client-Side Only** (Not for blog content, but OK for interactions):
+```typescript
+import type { LikeResponse, CommentCreateResponse } from '~/types/api'
+
+// $fetch - Client-side only, use for user interactions (typed)
+const result = await $fetch<LikeResponse>('/api/posts/like', { method: 'POST' })
+
+// ❌ NO for blog content (no SSR)
+const posts = await $fetch('/api/posts')
+
+// fetch - Native browser API, no SSR
+const res = await fetch('/api/posts') // ❌ NO for blog content
+```
+
+**Why SSR for Blog Content?**
+- ✅ Content available for search engines (Google, Bing)
+- ✅ Better Core Web Vitals (LCP, FCP)
+- ✅ Social media previews work properly
+- ✅ Faster perceived performance
+- ✅ Works without JavaScript enabled
+
+**When to use `$fetch` (Client-Side)?**
+- ✅ User interactions (like, comment, vote, share)
+- ✅ Form submissions (contact, newsletter)
+- ✅ Real-time updates (notifications, live data)
+- ✅ User-specific actions after login
+- ✅ Analytics tracking
+- ❌ **NEVER for blog content** (posts, articles, pages)
 
 ### State Management
 - Local state: `ref()`, `reactive()`
@@ -415,7 +491,7 @@ router.push('/path')
 
 // Route params
 const route = useRoute()
-console.log(route.params.id)
+console.log(route.params.slug)
 ```
 
 ## Don'ts
@@ -437,6 +513,7 @@ console.log(route.params.id)
 ❌ Don't use multiple `<h1>` tags on a page
 ❌ Don't forget width/height on images (causes CLS)
 ❌ Don't use non-descriptive link text ("click here", "read more")
+❌ Don't use `$fetch` or `fetch` for blog content (no SSR, bad for SEO)
 
 ## Do's
 ✅ Use semantic HTML (`<article>`, `<section>`, `<header>`, etc.)
@@ -459,6 +536,10 @@ console.log(route.params.id)
 ✅ Use `<time>` tag for dates with datetime attribute
 ✅ Optimize images (WebP, lazy loading)
 ✅ Add canonical URLs to prevent duplicate content
+✅ Use `useFetch` or `useAsyncData` for blog content (SSR for SEO)
+✅ Use `$fetch` for user interactions (like, comment, form submit)
+✅ Always type API responses with `useFetch<T>` and `$fetch<T>`
+✅ Define all API response types in `types/` directory
 
 ---
 
