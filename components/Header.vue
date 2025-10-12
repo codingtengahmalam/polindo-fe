@@ -1,29 +1,42 @@
 <template>
-  <header class="fixed top-0 z-50 w-full h-[68px] bg-grayscale-90">
+  <header
+    :class="['fixed top-0 w-full bg-grayscale-90', HEADER_Z_INDEX]"
+    :style="{ height: HEADER_HEIGHT }"
+  >
     <div class="container h-full">
       <nav
         class="flex items-center justify-between h-full"
         aria-label="Main navigation"
       >
-        <div class="flex items-center gap-4">
+        <!-- Left Side: Logo & Menu -->
+        <div class="flex items-center gap-4 xl:gap-6">
           <!-- Logo -->
-          <NuxtLink to="/" aria-label="Politik Indonesia Home">
+          <NuxtLink
+            to="/"
+            aria-label="Politik Indonesia Home"
+            class="shrink-0"
+          >
             <img
               src="/logo.png"
               alt="Politik Indonesia - Jaringan Informasi Politik"
               width="160"
               height="40"
-              class="w-auto h-10"
+              class="w-auto h-8 md:h-9 xl:h-10"
             />
           </NuxtLink>
 
-          <!-- Main Menu -->
-          <ul class="flex items-center text-base font-semibold">
+          <!-- Desktop Menu (≥1280px) -->
+          <ul class="hidden xl:flex items-center text-base font-semibold">
             <li v-for="item in MAIN_MENU" :key="item.label">
               <NuxtLink
                 :to="item.to"
-                class="block p-2.5 transition-colors text-white hover:text-brand-600"
-                :aria-current="route.path === item.to ? 'page' : undefined"
+                :class="[
+                  'block px-2.5 py-2.5 transition-colors',
+                  isActiveRoute(item.to)
+                    ? 'text-brand-600'
+                    : 'text-white hover:text-brand-600'
+                ]"
+                :aria-current="isActiveRoute(item.to) ? 'page' : undefined"
               >
                 {{ item.label }}
               </NuxtLink>
@@ -31,16 +44,70 @@
           </ul>
         </div>
 
-        <!-- Search Button -->
-        <NuxtLink
-          to="/search"
-          class="transition-colors text-white hover:text-brand-600"
-          aria-label="Search"
-        >
-          <IconSearch />
-        </NuxtLink>
+        <!-- Right Side: Search & Hamburger -->
+        <div class="flex items-center gap-4">
+          <!-- Search Button -->
+          <NuxtLink
+            to="/search"
+            class="transition-colors text-white hover:text-brand-600"
+            aria-label="Search"
+          >
+            <IconSearch />
+          </NuxtLink>
+
+          <!-- Hamburger Button (Mobile & Tablet) -->
+          <button
+            type="button"
+            class="xl:hidden text-white hover:text-brand-600 transition-colors"
+            :aria-label="isMenuOpen ? 'Close menu' : 'Open menu'"
+            :aria-expanded="isMenuOpen"
+            @click="toggleMenu"
+          >
+            <IconMenu v-if="!isMenuOpen" />
+            <IconClose v-else />
+          </button>
+        </div>
       </nav>
     </div>
+
+    <!-- Mobile Menu (Slide-in from right) -->
+    <Transition name="slide">
+      <div
+        v-if="isMenuOpen"
+        :class="['xl:hidden fixed inset-0 bg-grayscale-90', MOBILE_MENU_Z_INDEX]"
+        :style="{ top: HEADER_HEIGHT }"
+      >
+        <nav class="container py-6" aria-label="Mobile navigation">
+          <ul class="space-y-1">
+            <li v-for="item in MAIN_MENU" :key="item.label">
+              <NuxtLink
+                :to="item.to"
+                :class="[
+                  'block px-4 py-3 text-base font-semibold transition-colors rounded-lg',
+                  isActiveRoute(item.to)
+                    ? 'text-brand-600'
+                    : 'text-white'
+                ]"
+                :aria-current="isActiveRoute(item.to) ? 'page' : undefined"
+                @click="closeMenu"
+              >
+                {{ item.label }}
+              </NuxtLink>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </Transition>
+
+    <!-- Backdrop Overlay -->
+    <Transition name="fade">
+      <div
+        v-if="isMenuOpen"
+        :class="['xl:hidden fixed inset-0 bg-black/50', BACKDROP_Z_INDEX]"
+        :style="{ top: HEADER_HEIGHT }"
+        @click="closeMenu"
+      ></div>
+    </Transition>
   </header>
 </template>
 
@@ -52,6 +119,11 @@ interface MenuItem {
 }
 
 // Constants
+const HEADER_HEIGHT = "68px";
+const HEADER_Z_INDEX = "z-50";
+const MOBILE_MENU_Z_INDEX = "z-40";
+const BACKDROP_Z_INDEX = "z-30";
+
 const MAIN_MENU: MenuItem[] = [
   { label: "Politik", to: "/categories/politik" },
   { label: "Hukum", to: "/categories/hukum" },
@@ -65,4 +137,84 @@ const MAIN_MENU: MenuItem[] = [
 
 // Composables
 const route = useRoute();
+
+// Reactive state
+const isMenuOpen = ref(false);
+
+// Methods
+const toggleMenu = (): void => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
+
+const closeMenu = (): void => {
+  isMenuOpen.value = false;
+};
+
+const isActiveRoute = (path: string): boolean => {
+  return route.path === path || route.path.startsWith(path + "/");
+};
+
+// Watchers
+// Close menu when route changes
+watch(
+  () => route.path,
+  () => {
+    closeMenu();
+  }
+);
+
+// Prevent body scroll when menu is open
+watch(isMenuOpen, (isOpen) => {
+  if (isOpen) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+});
+
+// Lifecycle hooks
+// Close menu on escape key
+onMounted(() => {
+  const handleEscape = (e: KeyboardEvent) => {
+    if (e.key === "Escape" && isMenuOpen.value) {
+      closeMenu();
+    }
+  };
+
+  window.addEventListener("keydown", handleEscape);
+
+  // Store cleanup function
+  onBeforeUnmount(() => {
+    window.removeEventListener("keydown", handleEscape);
+    // Reset body scroll on component unmount
+    document.body.style.overflow = "";
+  });
+});
 </script>
+
+<style scoped>
+/* Slide transition for mobile menu */
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease-in-out;
+}
+
+.slide-enter-from {
+  transform: translateX(100%);
+}
+
+.slide-leave-to {
+  transform: translateX(100%);
+}
+
+/* Fade transition for backdrop */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
