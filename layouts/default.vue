@@ -1,6 +1,7 @@
 <template>
   <Header />
-  <main class="min-h-[calc(100vh-84px)] pt-20">
+  <main class="min-h-[calc(100vh-84px)] pt-[68px]">
+    <TrendingCarousel />
     <slot />
   </main>
   <Footer />
