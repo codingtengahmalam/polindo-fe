@@ -1,5 +1,8 @@
 <template>
-  <div>main</div>
+  <ContentContainer>
+    <HomeHotNews />
+    <div>main</div>
+  </ContentContainer>
 </template>
 
 <script lang="ts" setup></script>

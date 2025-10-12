@@ -5,7 +5,7 @@
     @mouseenter="stopAutoSlide"
     @mouseleave="startAutoSlide"
   >
-    <div class="container mx-auto px-4 md:px-6 xl:px-0 flex items-center justify-between gap-4">
+    <div class="container mx-auto px-0 md:px-10 xl:px-20 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3 md:gap-5 min-w-0 flex-1">
         <div class="flex items-center gap-2 flex-shrink-0">
           <IconAnnouncement class="sm:size-4" />
