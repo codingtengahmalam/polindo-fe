@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="bg-brand-25 min-h-14 flex items-center"
+    class="bg-brand-25 min-h-12 flex items-center"
     aria-label="Trending articles carousel"
     @mouseenter="stopAutoSlide"
     @mouseleave="startAutoSlide"
