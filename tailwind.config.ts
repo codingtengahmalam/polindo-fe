@@ -9,8 +9,8 @@ export default <Partial<Config>>{
       center: true,
       padding: {
         DEFAULT: "1rem",
-        sm: "2rem",
-        xl: "90px",
+        // sm: "2rem",
+        xl: "0px",
       },
     },
     screens: {

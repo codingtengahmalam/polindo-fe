@@ -1,7 +1,9 @@
 <template>
-  <div>
+  <Header />
+  <main class="min-h-[calc(100vh-84px)] pt-20">
     <slot />
-  </div>
+  </main>
+  <Footer />
 </template>
 
 <script lang="ts" setup>
