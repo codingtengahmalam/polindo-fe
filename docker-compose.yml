@@ -1,0 +1,8 @@
+version: "3"
+services:
+  web:
+    image: polindo-fe:latest
+    container_name: "polindo-fe"
+    build: .
+    ports:
+      - "5000:3000"
