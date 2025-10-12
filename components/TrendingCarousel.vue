@@ -9,7 +9,7 @@
       <div class="flex items-center gap-3 md:gap-5 min-w-0 flex-1">
         <div class="flex items-center gap-2 flex-shrink-0">
           <IconAnnouncement class="sm:size-4" />
-          <span class="text-brand-600 text-xs md:text-sm font-semibold">TRENDING</span>
+          <span class="text-brand-600 hidden md:block text-sm font-semibold">TRENDING</span>
         </div>
         <NuxtLink
           v-if="currentItem"
