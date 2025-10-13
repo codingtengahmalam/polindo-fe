@@ -39,7 +39,7 @@
       <div v-if="hasMoreEvents" class="pt-1">
         <NuxtLink
           to="/events"
-          class="text-brand-600 uppercase text-sm font-normal flex items-center gap-2 hover:text-brand-700 transition-colors"
+          class="text-brand-800 uppercase text-sm font-normal flex items-center gap-2 hover:text-brand-700 transition-colors"
           aria-label="Lihat semua agenda lainnya"
         >
           Lihat Agenda Lainnya

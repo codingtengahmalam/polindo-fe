@@ -21,11 +21,9 @@
           <time :datetime="mainNews.dateISO" class="text-xs">
             {{ mainNews.date }}
           </time>
-          <span
-            class="text-[10px] leading-1.1 py-0.5 px-1 border border-brand-600 rounded-sm text-brand-600 uppercase"
-          >
+          <CategoryBadge>
             {{ mainNews.category }}
-          </span>
+          </CategoryBadge>
         </div>
         <h3 class="text-title text-2xl font-playfair font-bold">
           <NuxtLink
@@ -50,11 +48,9 @@
             <time :datetime="news.dateISO" class="text-xs">
               {{ news.date }}
             </time>
-            <span
-              class="text-[10px] leading-1.1 py-0.5 px-1 border border-brand-600 rounded-sm text-brand-600 uppercase"
-            >
+            <CategoryBadge>
               {{ news.category }}
-            </span>
+            </CategoryBadge>
           </div>
           <h3 class="text-title text-lg font-playfair font-bold">
             <NuxtLink
