@@ -5,7 +5,7 @@
         <HomeHotNews />
       </section>
       <aside class="w-full">
-        <UpcomingEvent />
+        <WidgetUpcomingEvent />
       </aside>
     </div>
     <div>main</div>
