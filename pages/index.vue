@@ -4,10 +4,10 @@
       <section class="w-full xl:w-[720px] xl:shrink-0">
         <HomeHotNews />
       </section>
-      <aside class="w-full pl-0 lg:pl-5 space-y-10">
+      <section class="w-full pl-0 lg:pl-5 space-y-10">
         <WidgetUpcomingEvent />
         <WidgetLatestNews />
-      </aside>
+      </section>
     </div>
     <div>main</div>
   </ContentContainer>
