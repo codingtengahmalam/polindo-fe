@@ -15,15 +15,24 @@
         v-for="event in displayedEvents"
         :key="event.id"
         class="border-b border-grayscale-10 pb-3 last:border-b-0"
+        itemscope
+        itemtype="https://schema.org/Event"
       >
         <time
           class="block text-xs text-grayscale-40"
           :datetime="event.dateISO"
+          itemprop="startDate"
         >
           {{ event.date }}
         </time>
         <h3 class="text-title font-semibold line-clamp-2" :title="event.title">
-          {{ event.title }}
+          <NuxtLink
+            :to="event.to"
+            class="hover:text-brand-600 transition-colors"
+            itemprop="url"
+          >
+            <span itemprop="name">{{ event.title }}</span>
+          </NuxtLink>
         </h3>
       </article>
 
@@ -52,30 +61,35 @@ const upcomingEvents = [
     date: '20 Oktober 2025',
     dateISO: '2025-10-20',
     title: 'Sosialisasi Program Kerja Sama Ekonomi Indonesia-Polandia Tahun 2026',
+    to: '/events/sosialisasi-program-kerja-sama-ekonomi-indonesia-polandia-tahun-2026',
   },
   {
     id: 2,
     date: '21 Oktober 2025',
     dateISO: '2025-10-21',
     title: 'Webinar: Peluang Investasi dan Bisnis di Sektor Teknologi Polandia',
+    to: '/events/webinar-peluang-investasi-dan-bisnis-di-sektor-teknologi-polandia',
   },
   {
     id: 3,
     date: '25 Oktober 2025',
     dateISO: '2025-10-25',
     title: 'Workshop Ekspor Produk UMKM Indonesia ke Pasar Eropa Timur',
+    to: '/events/workshop-ekspor-produk-umkm-indonesia-ke-pasar-eropa-timur',
   },
   {
     id: 4,
     date: '28 Oktober 2025',
     dateISO: '2025-10-28',
     title: 'Networking Event: Pertemuan Pengusaha Indonesia dan Polandia',
+    to: '/events/networking-event-pertemuan-pengusaha-indonesia-dan-polandia',
   },
   {
     id: 5,
     date: '1 November 2025',
     dateISO: '2025-11-01',
     title: 'Seminar Kebijakan Perdagangan Internasional dan Regulasi Bea Cukai',
+    to: '/events/seminar-kebijakan-perdagangan-internasional-dan-regulasi-bea-cukai',
   },
 ]
 
