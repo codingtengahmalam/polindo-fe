@@ -19,7 +19,7 @@
         >
           {{ news.time }}
         </time>
-        <div class="flex flex-col items-start gap-1">
+        <div class="flex flex-col items-start gap-3">
           <h3 class="w-full text-title text-sm font-semibold line-clamp-3">
             <NuxtLink
               :to="news.to"
