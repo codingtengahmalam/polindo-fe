@@ -28,7 +28,9 @@
               {{ news.title }}
             </NuxtLink>
           </h3>
-          <CategoryBadge>{{ news.category }}</CategoryBadge>
+          <CategoryBadge :category="news.category">
+            {{ news.category }}
+          </CategoryBadge>
         </div>
       </article>
       <div v-if="hasMoreNews" class="pt-1">

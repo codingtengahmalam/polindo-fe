@@ -11,22 +11,59 @@
           <IconAnnouncement class="sm:size-4" />
           <span class="text-brand-600 hidden md:block text-sm font-semibold">TRENDING</span>
         </div>
-        <NuxtLink
-          v-if="currentItem"
-          :to="currentItem.link"
-          class="text-xs md:text-sm text-subtitle overflow-hidden text-ellipsis whitespace-nowrap transition-opacity ease-in-out min-w-0"
-          :class="{ 'opacity-0': isFading, 'opacity-100': !isFading }"
-          :style="{ transitionDuration: `${FADE_DURATION}ms` }"
-        >
-          {{ currentItem.title }}
-        </NuxtLink>
+        <div class="relative min-w-0 flex-1 overflow-hidden">
+          <div
+            ref="sliderRef"
+            class="flex"
+            :style="{
+              transform: `translateX(-${currentIndex * 100}%)`,
+              transition: isTransitioning ? `transform ${SLIDE_DURATION}ms ease-in-out` : 'none'
+            }"
+          >
+            <!-- Clone of last item for seamless loop (next) -->
+            <NuxtLink
+              v-if="lastItem"
+              :to="lastItem.link"
+              class="text-xs md:text-sm text-subtitle whitespace-nowrap flex-shrink-0 w-full"
+              tabindex="-1"
+            >
+              <span class="overflow-hidden text-ellipsis block">
+                {{ lastItem.title }}
+              </span>
+            </NuxtLink>
+
+            <!-- Original items -->
+            <NuxtLink
+              v-for="item in dummyData"
+              :key="item.id"
+              :to="item.link"
+              class="text-xs md:text-sm text-subtitle whitespace-nowrap flex-shrink-0 w-full"
+            >
+              <span class="overflow-hidden text-ellipsis block">
+                {{ item.title }}
+              </span>
+            </NuxtLink>
+
+            <!-- Clone of first item for seamless loop (prev) -->
+            <NuxtLink
+              v-if="firstItem"
+              :to="firstItem.link"
+              class="text-xs md:text-sm text-subtitle whitespace-nowrap flex-shrink-0 w-full"
+              tabindex="-1"
+            >
+              <span class="overflow-hidden text-ellipsis block">
+                {{ firstItem.title }}
+              </span>
+            </NuxtLink>
+          </div>
+        </div>
       </div>
       <div class="flex items-center gap-3 text-grayscale-40 flex-shrink-0">
         <button
           type="button"
           aria-label="Previous trending article"
           class="cursor-pointer transition-colors hover:text-grayscale-100"
-          :disabled="isFading"
+          :disabled="isSliding"
           @click="goToPrev"
         >
           <IconChevronLeft class="size-3" />
@@ -35,7 +72,7 @@
           type="button"
           aria-label="Next trending article"
           class="cursor-pointer transition-colors hover:text-grayscale-100"
-          :disabled="isFading"
+          :disabled="isSliding"
           @click="goToNext"
         >
           <IconChevronLeft class="size-3 rotate-180" />
@@ -47,8 +84,8 @@
 
 <script lang="ts" setup>
 // Constants
-const FADE_DURATION = 400 // milliseconds
-const AUTO_SLIDE_INTERVAL = 3000 // milliseconds
+const SLIDE_DURATION = 800 // milliseconds
+const AUTO_SLIDE_INTERVAL = 5000 // milliseconds
 
 interface TrendingItem {
   id: number
@@ -76,33 +113,68 @@ const dummyData: TrendingItem[] = [
 ]
 
 // Reactive state
-const currentIndex = ref(0)
-const isFading = ref(false)
+const currentIndex = ref(1) // Start at 1 because we have a cloned item at index 0
+const isSliding = ref(false)
+const isTransitioning = ref(true)
+const sliderRef = ref<HTMLElement | null>(null)
 
 // Computed properties
-const currentItem = computed<TrendingItem | undefined>(() => dummyData[currentIndex.value])
+const firstItem = computed(() => dummyData[0])
+const lastItem = computed(() => dummyData[dummyData.length - 1])
 
 // Methods
 const goToNext = () => {
-  if (isFading.value || dummyData.length === 0) return
+  if (isSliding.value || dummyData.length === 0) return
 
-  isFading.value = true
+  isSliding.value = true
+  isTransitioning.value = true
+
+  currentIndex.value++
 
   setTimeout(() => {
-    currentIndex.value = (currentIndex.value + 1) % dummyData.length
-    isFading.value = false
-  }, FADE_DURATION)
+    // If we're at the cloned last item (index = length + 1)
+    if (currentIndex.value > dummyData.length) {
+      // Disable transition for instant jump
+      isTransitioning.value = false
+      // Jump to the real first item (index 1)
+      currentIndex.value = 1
+
+      // Re-enable transition after a tiny delay
+      setTimeout(() => {
+        isTransitioning.value = true
+        isSliding.value = false
+      }, 50)
+    } else {
+      isSliding.value = false
+    }
+  }, SLIDE_DURATION)
 }
 
 const goToPrev = () => {
-  if (isFading.value || dummyData.length === 0) return
+  if (isSliding.value || dummyData.length === 0) return
 
-  isFading.value = true
+  isSliding.value = true
+  isTransitioning.value = true
+
+  currentIndex.value--
 
   setTimeout(() => {
-    currentIndex.value = currentIndex.value === 0 ? dummyData.length - 1 : currentIndex.value - 1
-    isFading.value = false
-  }, FADE_DURATION)
+    // If we're at the cloned first item (index = 0)
+    if (currentIndex.value < 1) {
+      // Disable transition for instant jump
+      isTransitioning.value = false
+      // Jump to the real last item (index = length)
+      currentIndex.value = dummyData.length
+
+      // Re-enable transition after a tiny delay
+      setTimeout(() => {
+        isTransitioning.value = true
+        isSliding.value = false
+      }, 50)
+    } else {
+      isSliding.value = false
+    }
+  }, SLIDE_DURATION)
 }
 
 let autoSlideInterval: ReturnType<typeof setInterval> | null = null
