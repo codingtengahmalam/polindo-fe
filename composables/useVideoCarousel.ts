@@ -21,26 +21,45 @@ export const useVideoCarousel = (
 
   /**
    * Determine if a video should be rendered based on its index
-   * Strategy: Only render current page + next page (for preloading)
-   * This reduces network requests and improves performance
+   * Strategy: Render current page + adjacent pages (prev & next) for instant navigation
+   *
+   * Example with videosPerPage = 4:
+   * - Page 0: Render indices [0,1,2,3] + preload [4,5,6,7] (next)
+   * - Page 1: Render indices [4,5,6,7] + preload [0,1,2,3] (prev) + [8,9,10,11] (next)
+   * - Page 2: Render indices [8,9,10,11] + preload [4,5,6,7] (prev)
+   *
+   * This ensures smooth navigation without loading delays
    */
   const shouldRenderVideo = (index: number): boolean => {
     const startIndex = currentPage.value * videosPerPage.value;
     const endIndex = startIndex + videosPerPage.value;
 
-    // Render current page videos (always visible)
+    // ✅ Always render current page videos (visible on screen)
     if (index >= startIndex && index < endIndex) {
       return true;
     }
 
-    // Preload next page only (for smooth forward transition)
-    // Don't preload previous page to reduce network requests
-    const nextEndIndex = Math.min(
-      videos.length,
-      (currentPage.value + 2) * videosPerPage.value
-    );
-    if (index >= endIndex && index < nextEndIndex) {
-      return true;
+    // ✅ Preload PREVIOUS page (for smooth backward navigation)
+    if (currentPage.value > 0) {
+      const prevStartIndex = (currentPage.value - 1) * videosPerPage.value;
+      const prevEndIndex = prevStartIndex + videosPerPage.value;
+
+      if (index >= prevStartIndex && index < prevEndIndex) {
+        return true;
+      }
+    }
+
+    // ✅ Preload NEXT page (for smooth forward navigation)
+    if (currentPage.value < totalPages.value - 1) {
+      const nextStartIndex = (currentPage.value + 1) * videosPerPage.value;
+      const nextEndIndex = Math.min(
+        videos.length,
+        nextStartIndex + videosPerPage.value
+      );
+
+      if (index >= nextStartIndex && index < nextEndIndex) {
+        return true;
+      }
     }
 
     return false;

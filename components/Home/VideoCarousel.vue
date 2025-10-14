@@ -58,11 +58,10 @@
                 :ref="(el) => setVideoRef(el, video.id)"
                 :controls="isIOS || activeVideoId === video.id"
                 :src="`${video.url}#t=0.001`"
-                :preload="isCurrentPageVideo(index) ? 'metadata' : 'none'"
+                preload="metadata"
                 controlsList="nodownload"
                 loading="lazy"
                 playsinline
-                webkit-playsinline
                 class="w-full aspect-[9/16] object-cover rounded-lg"
                 @play="handlePlay(video.id)"
                 @mouseenter="handleMouseEnter(video.id)"
