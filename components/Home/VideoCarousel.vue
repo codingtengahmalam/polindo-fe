@@ -49,27 +49,34 @@
             :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
             :style="gridStyle"
           >
-
-        <!-- the controls always show in IOS -->
-        <!-- #t=0.001 for fix thumbnail video not render in IOS -->
-        <!-- :controls="isIOS || activeVideoId === video.id" -->
-          <video
-            v-for="video in dummyData"
-            :ref="(el) => setVideoRef(el, video.id)"
-            :key="video.id"
-            :controls="isIOS || activeVideoId === video.id"
-            :src="`${video.url}#t=0.001`"
-            controlsList="nodownload"
-            playsinline
-            webkit-playsinline
-            class="w-full aspect-[9/16] object-cover rounded-lg"
-            @play="handlePlay(video.id)"
-            @mouseenter="handleMouseEnter(video.id)"
-            @mouseleave="handleMouseLeave(video.id)"
-            @touchstart="handleTouchStart(video.id)"
-          >
-            Your browser doesn't support video formats.
-          </video>
+            <!-- Only render visible videos (current page + next page for preloading) -->
+            <!-- the controls always show in IOS -->
+            <!-- #t=0.001 for fix thumbnail video not render in IOS -->
+            <template v-for="(video, index) in DUMMY_VIDEOS" :key="video.id">
+              <video
+                v-if="shouldRenderVideo(index)"
+                :ref="(el) => setVideoRef(el, video.id)"
+                :controls="isIOS || activeVideoId === video.id"
+                :src="`${video.url}#t=0.001`"
+                :preload="isCurrentPageVideo(index) ? 'metadata' : 'none'"
+                controlsList="nodownload"
+                loading="lazy"
+                playsinline
+                webkit-playsinline
+                class="w-full aspect-[9/16] object-cover rounded-lg"
+                @play="handlePlay(video.id)"
+                @mouseenter="handleMouseEnter(video.id)"
+                @mouseleave="handleMouseLeave(video.id)"
+                @touchstart="handleTouchStart(video.id)"
+              >
+                Your browser doesn't support video formats.
+              </video>
+              <!-- Placeholder for non-visible videos to maintain grid layout -->
+              <div
+                v-else
+                class="w-full aspect-[9/16] rounded-lg bg-grayscale-20"
+              />
+            </template>
           </div>
           <template #fallback>
             <div
@@ -90,190 +97,82 @@
 </template>
 
 <script lang="ts" setup>
-const dummyData = [
+import { isIOSDevice } from '~/utils/device'
+
+const DUMMY_VIDEOS = [
   {
     id: 1,
-    title: "Video 1",
-    url: "https://politikindonesia.id/uploads/videos/2025/10/pengamat-otomotif.mp4",
+    title: 'Video 1',
+    url: 'https://politikindonesia.id/uploads/videos/2025/10/pengamat-otomotif.mp4',
   },
   {
     id: 2,
-    title: "Video 2",
-    url: "https://politikindonesia.id/uploads/videos/2025/10/ini-alasan.mp4",
+    title: 'Video 2',
+    url: 'https://politikindonesia.id/uploads/videos/2025/10/ini-alasan.mp4',
   },
   {
     id: 3,
-    title: "Video 3",
-    url: "https://politikindonesia.id/uploads/videos/2025/10/istana-bongkar.mp4",
+    title: 'Video 3',
+    url: 'https://politikindonesia.id/uploads/videos/2025/10/istana-bongkar.mp4',
   },
   {
     id: 4,
-    title: "Video 4",
-    url: "https://politikindonesia.id/uploads/videos/2025/10/rocky-gerung-menduga.mp4",
+    title: 'Video 4',
+    url: 'https://politikindonesia.id/uploads/videos/2025/10/rocky-gerung-menduga.mp4',
   },
   {
     id: 5,
-    title: "Video 5",
-    url: "https://politikindonesia.id/uploads/videos/2025/10/pengamat-otomotif.mp4",
+    title: 'Video 5',
+    url: 'https://politikindonesia.id/uploads/videos/2025/10/pengamat-otomotif.mp4',
   },
   {
     id: 6,
-    title: "Video 6",
-    url: "https://politikindonesia.id/uploads/videos/2025/10/ini-alasan.mp4",
+    title: 'Video 6',
+    url: 'https://politikindonesia.id/uploads/videos/2025/10/ini-alasan.mp4',
   },
-];
+]
 
-// Video refs management
-const videoRefs = ref<Map<number, HTMLVideoElement>>(new Map());
-const activeVideoId = ref<number | null>(null);
-const isTouchDevice = ref(false);
+// Responsive video carousel state (automatically reactive to window resize)
+const { isMobile, videosPerPage, calculateGridStyle } =
+  useVideoCarouselResponsive()
 
-const isIOS = computed(() => {
-  if (typeof window === 'undefined') return false;
-  // Minimal UA-based check per MDN guidance; avoids deprecated navigator.platform
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-});
+// Video carousel management
+const {
+  activeVideoId,
+  currentPage,
+  totalPages,
+  shouldRenderVideo,
+  isCurrentPageVideo,
+  setVideoRef,
+  handlePlay,
+  handleMouseEnter,
+  handleMouseLeave,
+  handleTouchStart,
+  goToNext,
+  goToPrev,
+  resetToFirstPage,
+  clearAllVideoRefs,
+} = useVideoCarousel(DUMMY_VIDEOS, videosPerPage)
 
+const isIOS = computed(() => isIOSDevice())
 
-// Carousel state
-const currentPage = ref(0);
-const isMobile = ref(false);
+const gridStyle = computed(() =>
+  calculateGridStyle(currentPage.value, DUMMY_VIDEOS.length)
+)
 
-// Update mobile state
-const updateMobileState = () => {
-  if (typeof window !== "undefined") {
-    isMobile.value = window.innerWidth < 768;
+// Watch for mobile/desktop switch and reset carousel
+const prevIsMobile = ref(isMobile.value)
+watch(isMobile, (newValue) => {
+  if (prevIsMobile.value !== newValue) {
+    resetToFirstPage()
+    prevIsMobile.value = newValue
   }
-};
+})
 
-// Computed: Videos per page based on screen size
-// Mobile: 1 video per page, Desktop: 4 videos per page
-const videosPerPage = computed(() => {
-  return isMobile.value ? 1 : 4;
-});
-
-const totalPages = computed(() => {
-  return Math.ceil(dummyData.length / videosPerPage.value);
-});
-
-// Computed: Grid style with gap calculation
-const gridStyle = computed(() => {
-  if (isMobile.value) {
-    // Mobile: Each video takes 100% + gap (1rem = 16px)
-    // So each "slide" is calc(100% + 1rem)
-    // TranslateX needs to move by (100% + 1rem) per page
-    const translateValue = `calc(-${currentPage.value * 100}% - ${
-      currentPage.value * 1
-    }rem)`;
-
-    return {
-      transform: `translateX(${translateValue})`,
-      gridTemplateColumns: `repeat(${dummyData.length}, 100%)`,
-    };
-  } else {
-    // Desktop: 4 videos per page, account for gap between videos
-    // Each video = (100% - 3 gaps) / 4 = 25% - 0.75rem
-    return {
-      transform: `translateX(-${currentPage.value * 100}%)`,
-      gridTemplateColumns: `repeat(${dummyData.length}, calc(25% - 0.75rem))`,
-    };
-  }
-});
-
-// Set video element ref
-const setVideoRef = (el: any, id: number) => {
-  if (el) {
-    videoRefs.value.set(id, el as HTMLVideoElement);
-  }
-};
-
-// Carousel navigation
-const goToNext = () => {
-  if (currentPage.value < totalPages.value - 1) {
-    currentPage.value++;
-    pauseAllVideos();
-  }
-};
-
-const goToPrev = () => {
-  if (currentPage.value > 0) {
-    currentPage.value--;
-    pauseAllVideos();
-  }
-};
-
-// Pause all videos
-const pauseAllVideos = () => {
-  videoRefs.value.forEach((video) => {
-    if (!video.paused) {
-      video.pause();
-    }
-  });
-  activeVideoId.value = null;
-};
-
-// Handle play event - pause other videos when one plays
-const handlePlay = (playingId: number) => {
-  videoRefs.value.forEach((video, id) => {
-    if (id !== playingId && !video.paused) {
-      video.pause();
-    }
-  });
-};
-
-// Handle mouse enter - only for non-touch devices
-const handleMouseEnter = (id: number) => {
-  if (!isTouchDevice.value) {
-    activeVideoId.value = id;
-  }
-};
-
-// Handle mouse leave - hide controls if video is paused (non-touch only)
-const handleMouseLeave = (id: number) => {
-  if (!isTouchDevice.value) {
-    const video = videoRefs.value.get(id);
-    if (video && video.paused) {
-      activeVideoId.value = null;
-    }
-  }
-};
-
-// Handle touch start for mobile/tablet devices
-const handleTouchStart = (id: number) => {
-  isTouchDevice.value = true; // Mark as touch device
-
-  // Toggle controls on touch
-  if (activeVideoId.value === id) {
-    const video = videoRefs.value.get(id);
-    if (video && video.paused) {
-      activeVideoId.value = null;
-    }
-  } else {
-    activeVideoId.value = id;
-  }
-};
-
-// Handle window resize
-const handleResize = () => {
-  const wasMobile = isMobile.value;
-  updateMobileState();
-
-  // Reset to first page when switching between mobile/desktop
-  if (wasMobile !== isMobile.value) {
-    currentPage.value = 0;
-    pauseAllVideos();
-  }
-};
-
-// Add resize listener
-onMounted(() => {
-  updateMobileState();
-  window.addEventListener("resize", handleResize);
-});
-
+// Cleanup video refs on unmount
 onUnmounted(() => {
-  window.removeEventListener("resize", handleResize);
-});
+  clearAllVideoRefs()
+})
 </script>
 
 <style></style>
