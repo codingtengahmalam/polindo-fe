@@ -14,4 +14,19 @@ export default defineNuxtConfig({
 
   compatibilityDate: "2025-07-15",
   modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss"],
+
+  fonts: {
+    families: [
+      {
+        name: "Inter",
+        provider: "google",
+        weights: [400, 500, 600, 700, 800, 900],
+      },
+      {
+        name: "Playfair Display",
+        provider: "google",
+        weights: [400, 500, 600, 700, 800, 900],
+      },
+    ],
+  },
 });

@@ -25,13 +25,13 @@
             />
           </NuxtLink>
 
-          <!-- Desktop Menu (≥1280px) -->
-          <ul class="hidden xl:flex items-center text-base font-semibold">
+          <!-- Desktop Menu (≥1024px) -->
+          <ul class="hidden lg:flex items-center text-base font-semibold">
             <li v-for="item in MAIN_MENU" :key="item.label">
               <NuxtLink
                 :to="item.to"
                 :class="[
-                  'block px-2.5 py-2.5 transition-colors',
+                  'block px-2.5 py-2.5 transition-colors leading-1.3',
                   isActiveRoute(item.to)
                     ? 'text-brand-600'
                     : 'text-white hover:text-brand-600'
@@ -55,10 +55,10 @@
             <IconSearch />
           </NuxtLink>
 
-          <!-- Hamburger Button (Mobile & Tablet) -->
+          <!-- Hamburger Button (Mobile & Tablet <1024px) -->
           <button
             type="button"
-            class="xl:hidden text-white hover:text-brand-600 transition-colors"
+            class="lg:hidden text-white hover:text-brand-600 transition-colors"
             :aria-label="isMenuOpen ? 'Close menu' : 'Open menu'"
             :aria-expanded="isMenuOpen"
             @click="toggleMenu"
@@ -74,7 +74,7 @@
     <Transition name="slide">
       <div
         v-if="isMenuOpen"
-        :class="['xl:hidden fixed inset-0 bg-grayscale-90', MOBILE_MENU_Z_INDEX]"
+        :class="['lg:hidden fixed inset-0 bg-grayscale-90', MOBILE_MENU_Z_INDEX]"
         :style="{ top: HEADER_HEIGHT }"
       >
         <nav class="container py-6" aria-label="Mobile navigation">
@@ -83,7 +83,7 @@
               <NuxtLink
                 :to="item.to"
                 :class="[
-                  'block px-4 py-3 text-base font-semibold transition-colors rounded-lg',
+                  'block px-4 py-3 text-base font-semibold transition-colors leading-1.3',
                   isActiveRoute(item.to)
                     ? 'text-brand-600'
                     : 'text-white'
@@ -103,7 +103,7 @@
     <Transition name="fade">
       <div
         v-if="isMenuOpen"
-        :class="['xl:hidden fixed inset-0 bg-black/50', BACKDROP_Z_INDEX]"
+        :class="['lg:hidden fixed inset-0 bg-black/50', BACKDROP_Z_INDEX]"
         :style="{ top: HEADER_HEIGHT }"
         @click="closeMenu"
       ></div>

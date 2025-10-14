@@ -16,6 +16,7 @@ export default <Partial<Config>>{
     screens: {
       sm: "360px",
       md: "768px",
+      lg: "1024px",
       xl: "1280px",
     },
     extend: {
@@ -28,6 +29,7 @@ export default <Partial<Config>>{
         subtitle: "#434343",
         brand: {
           DEFAULT: "#e32528",
+          "25": "#FCEAE9",
           "50": "#fef2f2",
           "100": "#ffe1e1",
           "200": "#ffc8c9",
