@@ -52,16 +52,20 @@
             v-for="video in dummyData"
             :ref="(el) => setVideoRef(el, video.id)"
             :key="video.id"
-            :src="video.url"
             playsinline
             :controls="activeVideoId === video.id"
             controlsList="nodownload"
+            preload="metadata"
             class="w-full aspect-[9/16] object-cover rounded-lg"
             @play="handlePlay(video.id)"
             @mouseenter="handleMouseEnter(video.id)"
             @mouseleave="handleMouseLeave(video.id)"
             @touchstart="handleTouchStart(video.id)"
-          ></video>
+          >
+            <!-- #t=0.001 for fix thumbnail video not render in IOS -->
+            <source :src="`${video.url}#t=0.001`" type="video/mp4">
+            Your browser doesn't support video formats.
+          </video>
         </div>
       </div>
     </ContentContainer>
