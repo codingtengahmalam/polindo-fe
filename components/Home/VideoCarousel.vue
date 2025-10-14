@@ -49,18 +49,18 @@
             :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
             :style="gridStyle"
           >
-            <!-- Only render visible videos (current page + next page for preloading) -->
+            <!-- Only render visible videos (current page + adjacent pages for preloading) -->
             <!-- the controls always show in IOS -->
             <!-- #t=0.001 for fix thumbnail video not render in IOS -->
             <template v-for="(video, index) in DUMMY_VIDEOS" :key="video.id">
               <video
                 v-if="shouldRenderVideo(index)"
-                :ref="(el) => setVideoRef(el, video.id)"
+                :ref="(el) => setVideoRef(el, video.id, index)"
                 :controls="isIOS || activeVideoId === video.id"
                 :src="`${video.url}#t=0.001`"
                 preload="metadata"
                 controlsList="nodownload"
-                loading="lazy"
+                disablePictureInPicture
                 playsinline
                 class="w-full aspect-[9/16] object-cover rounded-lg"
                 @play="handlePlay(video.id)"

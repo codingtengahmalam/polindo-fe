@@ -1,6 +1,9 @@
+import { isIOSDevice } from "~/utils/device";
+
 /**
  * Composable for managing video carousel state and behavior
  * Handles video playback, refs management, and carousel navigation
+ * iOS-optimized with proper cleanup lifecycle
  */
 export const useVideoCarousel = (
   videos: Array<{ id: number; title: string; url: string }>,
@@ -10,6 +13,7 @@ export const useVideoCarousel = (
   const videoRefs = ref<Map<number, HTMLVideoElement>>(new Map());
   const activeVideoId = ref<number | null>(null);
   const isTouchDevice = ref(false);
+  const isIOS = ref(isIOSDevice());
 
   // Carousel state
   const currentPage = ref(0);
@@ -76,11 +80,51 @@ export const useVideoCarousel = (
   };
 
   /**
-   * Set video element ref
+   * Properly cleanup a video element (crucial for iOS)
+   * This prevents memory leaks and loading issues on iOS Safari
    */
-  const setVideoRef = (el: any, id: number) => {
+  const cleanupVideoElement = (video: HTMLVideoElement) => {
+    try {
+      // 1. Pause the video first
+      if (!video.paused) {
+        video.pause();
+      }
+
+      // 2. Remove src and trigger load() to release resources
+      // This is CRITICAL for iOS Safari to properly release video memory
+      video.removeAttribute("src");
+      video.load();
+
+      // 3. Set source to empty blob (iOS-specific fix)
+      if (isIOS.value) {
+        video.src = "";
+      }
+    } catch (error) {
+      // Silently handle errors during cleanup
+      console.warn("Video cleanup error:", error);
+    }
+  };
+
+  /**
+   * Set video element ref with proper cleanup of old refs
+   */
+  const setVideoRef = (el: any, id: number, index: number) => {
+    // Cleanup old ref if exists (when video re-renders)
+    const existingVideo = videoRefs.value.get(id);
+    if (existingVideo && existingVideo !== el) {
+      cleanupVideoElement(existingVideo);
+      videoRefs.value.delete(id);
+    }
+
+    // Set new ref
     if (el) {
       videoRefs.value.set(id, el as HTMLVideoElement);
+    } else if (!shouldRenderVideo(index)) {
+      // Video is being unmounted, cleanup before removal
+      if (existingVideo) {
+        cleanupVideoElement(existingVideo);
+        videoRefs.value.delete(id);
+      }
     }
   };
 
@@ -167,6 +211,7 @@ export const useVideoCarousel = (
 
   /**
    * Clean up video refs that are no longer rendered
+   * Enhanced with proper video element cleanup for iOS
    */
   const cleanupUnrenderedVideoRefs = () => {
     const renderedVideoIds = new Set<number>();
@@ -178,8 +223,10 @@ export const useVideoCarousel = (
     });
 
     // Remove refs for videos that are no longer rendered
-    videoRefs.value.forEach((_, id) => {
+    // IMPORTANT: Properly cleanup video elements before removing refs (iOS fix)
+    videoRefs.value.forEach((videoElement, id) => {
       if (!renderedVideoIds.has(id)) {
+        cleanupVideoElement(videoElement);
         videoRefs.value.delete(id);
       }
     });
@@ -195,14 +242,29 @@ export const useVideoCarousel = (
 
   /**
    * Clear all video refs (cleanup on unmount)
+   * Enhanced with proper video cleanup for iOS
    */
   const clearAllVideoRefs = () => {
+    // Cleanup all video elements before clearing refs
+    videoRefs.value.forEach((videoElement) => {
+      cleanupVideoElement(videoElement);
+    });
     videoRefs.value.clear();
   };
 
   // Watch currentPage to cleanup video refs when page changes
-  watch(currentPage, () => {
-    cleanupUnrenderedVideoRefs();
+  // Use nextTick to ensure DOM updates complete before cleanup (iOS fix)
+  watch(currentPage, async () => {
+    // For iOS: wait for DOM to settle before cleanup
+    if (isIOS.value) {
+      await nextTick();
+      // Small delay for iOS to ensure video elements are properly unmounted
+      setTimeout(() => {
+        cleanupUnrenderedVideoRefs();
+      }, 100);
+    } else {
+      cleanupUnrenderedVideoRefs();
+    }
   });
 
   return {
