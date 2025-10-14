@@ -6,14 +6,16 @@
 
     <!-- Main News of Hot News -->
     <article v-if="mainNews" class="space-y-4">
-      <NuxtLink :to="`/articles/${mainNews.slug}`" class="block overflow-hidden rounded-lg">
-        <img
+      <NuxtLink :to="`/articles/${mainNews.slug}`" class="block overflow-hidden rounded-lg bg-grayscale-5">
+        <NuxtImg
           :src="mainNews.image"
           :alt="mainNews.title"
           width="720"
           height="400"
+          sizes="sm:100vw md:720px"
           class="w-full max-h-[400px] object-cover transition-transform duration-300 ease-in-out hover:scale-105"
-          loading="lazy"
+          loading="eager"
+          fetchpriority="high"
         />
       </NuxtLink>
       <div class="space-y-1 pb-5 border-b border-grayscale-10">
@@ -61,12 +63,13 @@
             </NuxtLink>
           </h3>
         </div>
-        <NuxtLink :to="`/articles/${news.slug}`" class="shrink-0 overflow-hidden rounded-lg">
-          <img
+        <NuxtLink :to="`/articles/${news.slug}`" class="shrink-0 overflow-hidden rounded-lg bg-grayscale-5">
+          <NuxtImg
             :src="news.image"
             :alt="news.title"
             width="96"
             height="96"
+            sizes="96px"
             class="w-24 h-24 object-cover transition-transform duration-300 ease-in-out hover:scale-105"
             loading="lazy"
           />
@@ -94,7 +97,7 @@ const hotNews: NewsItem[] = [
     slug: "mantan-pj-bupati-cilacap-didakwa-korupsi",
     title:
       "Mantan Pj Bupati Cilacap Didakwa Korupsi Rugikan Negara Rp 237 Miliar",
-    image: "/images/dummy1.png",
+    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
     date: "12 Oct 2025",
     dateISO: "2025-10-12",
     category: "Hukum",
@@ -103,7 +106,7 @@ const hotNews: NewsItem[] = [
   {
     slug: "polda-ntb-serahkan-tersangka-kematian-brigadir-nurhadi",
     title: "Polda NTB Serahkan 2 Tersangka Kematian Brigadir Nurhadi ke JPU",
-    image: "/images/dummy1.png",
+    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
     date: "11 Oct 2025",
     dateISO: "2025-10-11",
     category: "Hukum",
@@ -113,7 +116,7 @@ const hotNews: NewsItem[] = [
     slug: "presiden-jokowi-resmikan-tol-trans-sumatera",
     title:
       "Presiden Jokowi Resmikan Jalan Tol Trans Sumatera Sepanjang 2.765 Km",
-    image: "/images/dummy1.png",
+    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
     date: "11 Oct 2025",
     dateISO: "2025-10-11",
     category: "Infrastruktur",
@@ -122,7 +125,7 @@ const hotNews: NewsItem[] = [
   {
     slug: "menteri-esdm-targetkan-energi-terbarukan-2025",
     title: "Menteri ESDM Targetkan Energi Terbarukan Capai 23% di Tahun 2025",
-    image: "/images/dummy1.png",
+    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
     date: "10 Oct 2025",
     dateISO: "2025-10-10",
     category: "Ekonomi",
@@ -131,7 +134,7 @@ const hotNews: NewsItem[] = [
   {
     slug: "dpr-setujui-ruu-kesehatan",
     title: "DPR Setujui RUU Kesehatan, Fokus Perkuat Layanan Primer",
-    image: "/images/dummy1.png",
+    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
     date: "10 Oct 2025",
     dateISO: "2025-10-10",
     category: "Politik",
