@@ -53,6 +53,7 @@
             :ref="(el) => setVideoRef(el, video.id)"
             :key="video.id"
             :src="video.url"
+            playsinline
             :controls="activeVideoId === video.id"
             controlsList="nodownload"
             class="w-full aspect-[9/16] object-cover rounded-lg"
