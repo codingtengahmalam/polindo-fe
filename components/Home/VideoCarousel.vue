@@ -43,30 +43,47 @@
 
       <!-- Content Video -->
       <div class="overflow-hidden">
-        <div
-          class="grid gap-4 transition-transform duration-500 ease-in-out"
-          :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
-          :style="gridStyle"
-        >
+        <ClientOnly>
+          <div
+            class="grid gap-4 transition-transform duration-500 ease-in-out"
+            :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
+            :style="gridStyle"
+          >
+
+        <!-- the controls always show in IOS -->
+        <!-- #t=0.001 for fix thumbnail video not render in IOS -->
+        <!-- :controls="isIOS || activeVideoId === video.id" -->
           <video
             v-for="video in dummyData"
             :ref="(el) => setVideoRef(el, video.id)"
             :key="video.id"
-            playsinline
-            :controls="activeVideoId === video.id"
+            :controls="isIOS || activeVideoId === video.id"
+            :src="`${video.url}#t=0.001`"
             controlsList="nodownload"
-            preload="metadata"
+            playsinline
+            webkit-playsinline
             class="w-full aspect-[9/16] object-cover rounded-lg"
             @play="handlePlay(video.id)"
             @mouseenter="handleMouseEnter(video.id)"
             @mouseleave="handleMouseLeave(video.id)"
             @touchstart="handleTouchStart(video.id)"
           >
-            <!-- #t=0.001 for fix thumbnail video not render in IOS -->
-            <source :src="`${video.url}#t=0.001`" type="video/mp4">
             Your browser doesn't support video formats.
           </video>
-        </div>
+          </div>
+          <template #fallback>
+            <div
+              class="grid gap-4"
+              :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
+            >
+              <div
+                v-for="i in (isMobile ? 1 : 4)"
+                :key="i"
+                class="w-full aspect-[9/16] rounded-lg bg-grayscale-20 animate-pulse"
+              />
+            </div>
+          </template>
+        </ClientOnly>
       </div>
     </ContentContainer>
   </section>
@@ -110,6 +127,13 @@ const dummyData = [
 const videoRefs = ref<Map<number, HTMLVideoElement>>(new Map());
 const activeVideoId = ref<number | null>(null);
 const isTouchDevice = ref(false);
+
+const isIOS = computed(() => {
+  if (typeof window === 'undefined') return false;
+  // Minimal UA-based check per MDN guidance; avoids deprecated navigator.platform
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+});
+
 
 // Carousel state
 const currentPage = ref(0);
