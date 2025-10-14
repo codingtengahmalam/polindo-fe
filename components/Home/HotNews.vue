@@ -6,13 +6,13 @@
 
     <!-- Main News of Hot News -->
     <article v-if="mainNews" class="space-y-4">
-      <NuxtLink :to="`/articles/${mainNews.slug}`" class="block">
+      <NuxtLink :to="`/articles/${mainNews.slug}`" class="block overflow-hidden rounded-lg">
         <img
           :src="mainNews.image"
           :alt="mainNews.title"
           width="720"
           height="400"
-          class="w-full max-h-[400px] object-cover rounded-lg hover:opacity-90 transition-opacity"
+          class="w-full max-h-[400px] object-cover transition-transform duration-300 ease-in-out hover:scale-105"
           loading="lazy"
         />
       </NuxtLink>
@@ -21,7 +21,7 @@
           <time :datetime="mainNews.dateISO" class="text-xs">
             {{ mainNews.date }}
           </time>
-          <CategoryBadge>
+          <CategoryBadge :category="mainNews.category">
             {{ mainNews.category }}
           </CategoryBadge>
         </div>
@@ -48,7 +48,7 @@
             <time :datetime="news.dateISO" class="text-xs">
               {{ news.date }}
             </time>
-            <CategoryBadge>
+            <CategoryBadge :category="news.category">
               {{ news.category }}
             </CategoryBadge>
           </div>
@@ -61,13 +61,13 @@
             </NuxtLink>
           </h3>
         </div>
-        <NuxtLink :to="`/articles/${news.slug}`" class="shrink-0">
+        <NuxtLink :to="`/articles/${news.slug}`" class="shrink-0 overflow-hidden rounded-lg">
           <img
             :src="news.image"
             :alt="news.title"
             width="96"
             height="96"
-            class="w-24 h-24 rounded-lg object-cover hover:opacity-90 transition-opacity"
+            class="w-24 h-24 object-cover transition-transform duration-300 ease-in-out hover:scale-105"
             loading="lazy"
           />
         </NuxtLink>
