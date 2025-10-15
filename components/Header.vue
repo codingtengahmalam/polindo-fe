@@ -125,14 +125,14 @@ const MOBILE_MENU_Z_INDEX = "z-40";
 const BACKDROP_Z_INDEX = "z-30";
 
 const MAIN_MENU: MenuItem[] = [
-  { label: "Politik", to: "/categories/politik" },
-  { label: "Hukum", to: "/categories/hukum" },
-  { label: "Ekonomi", to: "/categories/ekonomi" },
-  { label: "Politisiana", to: "/categories/politisiana" },
-  { label: "Wawancara", to: "/categories/wawancara" },
-  { label: "Pendapat", to: "/categories/pendapat" },
-  { label: "Nusantara", to: "/categories/nusantara" },
-  { label: "Teknologi", to: "/categories/teknologi" },
+  { label: "Politik", to: "/category/politik" },
+  { label: "Hukum", to: "/category/hukum" },
+  { label: "Ekonomi", to: "/category/ekonomi" },
+  { label: "Politisiana", to: "/category/politisiana" },
+  { label: "Wawancara", to: "/category/wawancara" },
+  { label: "Pendapat", to: "/category/pendapat" },
+  { label: "Nusantara", to: "/category/nusantara" },
+  { label: "Teknologi", to: "/category/teknologi" },
 ];
 
 // Composables
