@@ -75,7 +75,9 @@ export default <Partial<Config>>{
     },
   },
   plugins: [
-    twTypography,
+    twTypography({
+      target: "legacy",
+    }),
     twForms({
       strategy: "class",
     }),

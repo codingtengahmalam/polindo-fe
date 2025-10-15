@@ -1,7 +1,7 @@
 <template>
   <div class="overflow-x-hidden">
     <Header />
-    <main class="min-h-[calc(100vh-84px)] pt-[68px]">
+    <main class="min-h-[calc(100vh-80px)] pt-[68px]">
       <TrendingCarousel />
       <slot />
     </main>

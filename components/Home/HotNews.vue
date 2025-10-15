@@ -6,7 +6,7 @@
 
     <!-- Main News of Hot News -->
     <article v-if="mainNews" class="space-y-4">
-      <NuxtLink :to="`/articles/${mainNews.slug}`" class="block overflow-hidden rounded-lg bg-grayscale-5">
+      <NuxtLink :to="`/${mainNews.slug}`" class="block overflow-hidden rounded-lg bg-grayscale-5">
         <NuxtImg
           :src="mainNews.image"
           :alt="mainNews.title"
@@ -23,13 +23,11 @@
           <time :datetime="mainNews.dateISO" class="text-xs">
             {{ mainNews.date }}
           </time>
-          <CategoryBadge :category="mainNews.category">
-            {{ mainNews.category }}
-          </CategoryBadge>
+          <CategoryBadge :name="mainNews.category" :slug="mainNews.category" />
         </div>
         <h3 class="text-title text-2xl font-playfair font-bold">
           <NuxtLink
-            :to="`/articles/${mainNews.slug}`"
+            :to="`/${mainNews.slug}`"
             class="hover:text-brand-600 transition-colors"
           >
             {{ mainNews.title }}
@@ -50,20 +48,18 @@
             <time :datetime="news.dateISO" class="text-xs">
               {{ news.date }}
             </time>
-            <CategoryBadge :category="news.category">
-              {{ news.category }}
-            </CategoryBadge>
+            <CategoryBadge :name="news.category" :slug="news.category" />
           </div>
           <h3 class="text-title text-lg font-playfair font-bold">
             <NuxtLink
-              :to="`/articles/${news.slug}`"
+              :to="`/${news.slug}`"
               class="hover:text-brand-600 transition-colors"
             >
               {{ news.title }}
             </NuxtLink>
           </h3>
         </div>
-        <NuxtLink :to="`/articles/${news.slug}`" class="shrink-0 overflow-hidden rounded-lg bg-grayscale-5">
+        <NuxtLink :to="`/${news.slug}`" class="shrink-0 overflow-hidden rounded-lg bg-grayscale-5">
           <NuxtImg
             :src="news.image"
             :alt="news.title"
