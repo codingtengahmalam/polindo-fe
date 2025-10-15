@@ -4,89 +4,111 @@
       class="flex flex-col xl:flex-row xl:items-start justify-between gap-5 pt-10"
     >
       <section class="w-full xl:w-[720px] xl:shrink-0 space-y-8">
-        <!-- Hero -->
-        <div class="space-y-2">
-          <!-- Main Image -->
-          <NuxtImg
-            :src="data.images.big"
-            :alt="data.title"
-            width="720"
-            height="400"
-            sizes="sm:100vw md:720px"
-            class="w-full object-cover rounded-lg"
-            loading="eager"
-            fetchpriority="high"
-          />
-          <!-- description of image -->
-          <p class="text-subtitle font-normal text-sm">
-            {{ data.images.description }}
-          </p>
-        </div>
-        <!-- Content -->
+        <!-- Article -->
         <article
           itemscope
           itemtype="https://schema.org/BlogPosting"
-          class="space-y-2"
+          class="space-y-8"
         >
-          <!-- Author & Category & Date -->
-          <div class="flex items-center gap-2 text-xs">
-            <Author :name="data.author.display_name" :slug="data.author.slug" />
-            <span class="text-grayscale-40">•</span>
-            <time
-              :datetime="data.created_at"
-              itemprop="datePublished"
-              class="text-subtitle font-normal"
+          <!-- Article Header -->
+          <header class="space-y-2">
+            <!-- Author & Category & Date -->
+            <div class="flex items-center gap-2 text-xs">
+              <Author
+                :name="data.author.display_name"
+                :slug="data.author.slug"
+                itemprop="author"
+              />
+              <span class="text-grayscale-40">•</span>
+              <time
+                :datetime="data.created_at"
+                itemprop="datePublished"
+                class="text-subtitle font-normal"
+              >
+                {{ relativeTime(data.created_at) }}
+              </time>
+              <CategoryBadge
+                :name="data.category.name"
+                :slug="data.category.slug"
+              />
+            </div>
+
+            <h1
+              itemprop="headline"
+              class="text-title text-2xl font-playfair font-bold"
             >
-              {{ relativeTime(data.created_at) }}
-            </time>
-            <CategoryBadge
-              :name="data.category.name"
-              :slug="data.category.slug"
+              {{ data.title }}
+            </h1>
+          </header>
+
+          <!-- Featured Image with Figure -->
+          <figure itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
+            <NuxtImg
+              :src="data.images.big"
+              :alt="data.title"
+              width="720"
+              height="400"
+              sizes="sm:100vw md:720px"
+              class="w-full object-cover rounded-lg"
+              loading="eager"
+              fetchpriority="high"
+              itemprop="url contentUrl"
             />
-          </div>
+            <figcaption class="text-subtitle font-normal text-sm mt-2">
+              {{ data.images.description }}
+            </figcaption>
+            <!-- Hidden meta for schema.org -->
+            <meta itemprop="width" content="720">
+            <meta itemprop="height" content="400">
+          </figure>
 
-          <h1
-            itemprop="headline"
-            class="text-title text-2xl font-playfair font-bold"
-          >
-            {{ data.title }}
-          </h1>
-
-          <!-- Article Body with Markdown/HTML Support -->
-          <div
+          <!-- Article Body -->
+          <section
             itemprop="articleBody"
             class="prose prose-sm md:prose-base max-w-none text-subtitle"
             v-html="renderedContent"
           />
-        </article>
 
-        <!-- Tags -->
-        <div class="space-y-2">
-          <h6 class="text-xs text-grayscale-40 uppercase">Kata Kunci</h6>
-          <div class="flex flex-wrap gap-2">
-            <NuxtLink
-              v-for="tag in data.tags"
-              :key="tag.id"
-              :to="`/tags/${tag.tag}`"
-              class="text-xs font-semibold border border-brand-300 rounded-sm p-2 text-brand-800 uppercase flex items-center gap-1"
-            >
-              <IconCircleCheck class="size-3" />
-              {{ tag.tag }}
-            </NuxtLink>
+          <!-- Article Footer (Tags) -->
+          <footer class="space-y-2 pt-4 border-t border-grayscale-10">
+            <h2 class="text-xs text-grayscale-40 uppercase">Kata Kunci</h2>
+            <div class="flex flex-wrap gap-2">
+              <NuxtLink
+                v-for="tag in data.tags"
+                :key="tag.id"
+                :to="`/tags/${tag.tag}`"
+                class="text-xs font-semibold border border-brand-300 rounded-sm p-2 text-brand-800 uppercase flex items-center gap-1"
+                itemprop="keywords"
+              >
+                <IconCircleCheck class="size-3" />
+                {{ tag.tag }}
+              </NuxtLink>
+            </div>
+          </footer>
+
+          <!-- Hidden Schema.org metadata -->
+          <meta itemprop="dateModified" :content="data.updated_at">
+          <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization" class="hidden">
+            <meta itemprop="name" content="Politik Indonesia">
+            <div itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
+              <meta itemprop="url" content="https://politikindonesia.id/logo.png">
+            </div>
           </div>
-        </div>
+        </article>
       </section>
-      <section class="w-full pl-0 xl:pl-10 space-y-10 sidebar-divider">
+
+      <!-- Sidebar -->
+      <aside class="w-full pl-0 xl:pl-10 space-y-10 sidebar-divider">
         <WidgetUpcomingEvent />
         <WidgetLatestNews type="popular" />
-      </section>
+      </aside>
     </div>
 
     <hr class="border-grayscale-10">
 
     <!-- Related Articles -->
-    <div class="space-y-5 pb-10">
-      <h6 class="text-lg text-title font-bold">Berita Terkait</h6>
+    <section class="space-y-5 pb-10">
+      <h2 class="text-lg text-title font-bold">Berita Terkait</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-8">
         <ArticleCard
           v-for="article in relatedArticles"
@@ -95,12 +117,15 @@
           class="grid-article-divider"
         />
       </div>
-    </div>
+    </section>
   </ContentContainer>
 </template>
 
 <script lang="ts" setup>
-const { renderContent, extractPlainText } = useMarkdown();
+
+// Composables
+const route = useRoute()
+const { renderContent, extractPlainText } = useMarkdown()
 
 // dummy data
 const data = {
@@ -157,7 +182,13 @@ const data = {
   updated_at: "2025-06-02T03:45:22.000000Z",
 };
 
-const renderedContent = computed(() => renderContent(data.content));
+// Computed Properties
+const renderedContent = computed(() => renderContent(data.content))
+
+// TODO: Add SEO meta tags when real API data is ready
+// - useSeoMeta() for title, description, OG tags
+// - Canonical URL
+// - Schema.org JSON-LD structured data
 
 // dummy data
 const relatedArticles = [
