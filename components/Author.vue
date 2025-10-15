@@ -1,6 +1,6 @@
 <template>
   <NuxtLink
-    :to="`profil/${slug}`"
+    :to="`/profil/${slug}`"
     class="text-subtitle font-normal text-xs flex items-center gap-1"
   >
     <span class="text-grayscale-40">Oleh</span> {{ name }}
