@@ -10,37 +10,6 @@
           itemtype="https://schema.org/BlogPosting"
           class="space-y-8"
         >
-          <!-- Article Header -->
-          <header class="space-y-2">
-            <!-- Author & Category & Date -->
-            <div class="flex items-center gap-2 text-xs">
-              <Author
-                :name="data.author.display_name"
-                :slug="data.author.slug"
-                itemprop="author"
-              />
-              <span class="text-grayscale-40">•</span>
-              <time
-                :datetime="data.created_at"
-                itemprop="datePublished"
-                class="text-subtitle font-normal"
-              >
-                {{ relativeTime(data.created_at) }}
-              </time>
-              <CategoryBadge
-                :name="data.category.name"
-                :slug="data.category.slug"
-              />
-            </div>
-
-            <h1
-              itemprop="headline"
-              class="text-title text-2xl font-playfair font-bold"
-            >
-              {{ data.title }}
-            </h1>
-          </header>
-
           <!-- Featured Image with Figure -->
           <figure itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
             <NuxtImg
@@ -61,6 +30,37 @@
             <meta itemprop="width" content="720">
             <meta itemprop="height" content="400">
           </figure>
+
+          <!-- Article Header -->
+          <header class="space-y-2">
+            <h1
+              itemprop="headline"
+              class="text-title text-2xl font-playfair font-bold"
+            >
+              {{ data.title }}
+            </h1>
+
+            <!-- Author & Category & Date -->
+            <div class="flex items-center gap-2 text-xs">
+              <Author
+                :name="data.author.display_name"
+                :slug="data.author.slug"
+                itemprop="author"
+              />
+              <span class="text-grayscale-40">•</span>
+              <time
+                :datetime="data.created_at"
+                itemprop="datePublished"
+                class="text-subtitle font-normal"
+              >
+                {{ relativeTime(data.created_at) }}
+              </time>
+              <CategoryBadge
+                :name="data.category.name"
+                :slug="data.category.slug"
+              />
+            </div>
+          </header>
 
           <!-- Article Body -->
           <section
