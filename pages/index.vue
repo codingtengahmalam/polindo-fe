@@ -11,6 +11,7 @@
     </div>
   </ContentContainer>
   <HomeVideoCarousel />
+  <HomeCategory />
 </template>
 
 <script lang="ts" setup></script>
