@@ -70,7 +70,7 @@
           />
 
           <!-- Article Footer (Tags) -->
-          <footer class="space-y-2 pt-4 border-t border-grayscale-10">
+          <footer class="space-y-2">
             <h2 class="text-xs text-grayscale-40 uppercase">Kata Kunci</h2>
             <div class="flex flex-wrap gap-2">
               <NuxtLink
