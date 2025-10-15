@@ -1,7 +1,7 @@
 <template>
   <ContentContainer class="px-4 md:px-10 xl:px-20 space-y-5">
     <div
-      class="flex flex-col xl:flex-row justify-between gap-5 lg:divide-x divide-grayscale-10 pt-10"
+      class="flex flex-col xl:flex-row xl:items-start justify-between gap-5 pt-10"
     >
       <section class="w-full xl:w-[720px] xl:shrink-0 space-y-8">
         <!-- Hero -->
@@ -76,7 +76,7 @@
           </div>
         </div>
       </section>
-      <section class="w-full pl-0 lg:pl-5 space-y-10">
+      <section class="w-full pl-0 xl:pl-10 space-y-10 sidebar-divider">
         <WidgetUpcomingEvent />
         <WidgetLatestNews type="popular" />
       </section>
@@ -87,11 +87,12 @@
     <!-- Related Articles -->
     <div class="space-y-5 pb-10">
       <h6 class="text-lg text-title font-bold">Berita Terkait</h6>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-8">
         <ArticleCard
           v-for="article in relatedArticles"
           :key="article.id"
           :article="article"
+          class="grid-article-divider"
         />
       </div>
     </div>

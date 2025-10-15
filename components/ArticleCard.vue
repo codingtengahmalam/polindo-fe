@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-lg space-y-5">
+  <div class="space-y-5">
     <NuxtLink
       :to="`/${article.title_slug}`"
       class="block overflow-hidden rounded-lg bg-grayscale-5"

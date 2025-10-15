@@ -177,4 +177,26 @@
 }
 
 @layer utilities {
+  /* Sidebar Divider - Vertical line that follows sidebar height */
+  .sidebar-divider {
+    @apply relative;
+    @apply before:content-[''] before:hidden xl:before:block;
+    @apply before:absolute before:left-0 before:top-0 before:bottom-0;
+    @apply before:w-px before:bg-grayscale-10 before:translate-x-5;
+  }
+
+  /* Grid Article Divider - Vertical line between grid columns */
+  .grid-article-divider {
+    @apply relative;
+    @apply before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0;
+    @apply before:w-px before:bg-grayscale-10 before:-translate-x-5;
+    /* Hide first item border */
+    @apply first:before:hidden;
+    /* Mobile: 2 columns - hide odd items (1st column) */
+    @apply [&:nth-child(2n+1)]:before:hidden;
+    /* Desktop: 3 columns - hide every 3n+1 items (1st column) */
+    @apply md:[&:nth-child(3n+1)]:before:hidden;
+    /* Desktop: show even items that are hidden on mobile */
+    @apply md:[&:nth-child(2n+1)]:before:block;
+  }
 }
