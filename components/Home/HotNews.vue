@@ -23,9 +23,7 @@
           <time :datetime="mainNews.dateISO" class="text-xs">
             {{ mainNews.date }}
           </time>
-          <CategoryBadge :category="mainNews.category">
-            {{ mainNews.category }}
-          </CategoryBadge>
+          <CategoryBadge :name="mainNews.category" :slug="mainNews.category" />
         </div>
         <h3 class="text-title text-2xl font-playfair font-bold">
           <NuxtLink
@@ -50,9 +48,7 @@
             <time :datetime="news.dateISO" class="text-xs">
               {{ news.date }}
             </time>
-            <CategoryBadge :category="news.category">
-              {{ news.category }}
-            </CategoryBadge>
+            <CategoryBadge :name="news.category" :slug="news.category" />
           </div>
           <h3 class="text-title text-lg font-playfair font-bold">
             <NuxtLink
