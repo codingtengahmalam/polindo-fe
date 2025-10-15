@@ -7,23 +7,23 @@
           <!-- Company Info & Contact -->
           <div class="space-y-5">
             <NuxtLink to="/" aria-label="Go to homepage">
-              <NuxtImg
+              <img
                 src="/logo.png"
-                alt="Politik Indonesia Logo"
+                alt="Politik Indonesia - Jaringan Informasi Politik"
                 height="48"
                 class="h-12 w-auto"
               />
             </NuxtLink>
             <address class="not-italic space-y-3 text-[#E5E8E8]">
               <div class="flex gap-3 items-start">
-                <IconTower class="h-5 w-5 shrink-0 mt-0.5 text-[#E5E8E8]" />
+                <IconTower class="h-5 shrink-0 mt-0.5" />
                 <span class="text-sm leading-relaxed">
                   Villa Melati Mas Blok M6 No 5, Jelupang, Serpong Utara,
                   Tangerang Selatan
                 </span>
               </div>
               <div class="flex gap-3 items-center">
-                <IconMail class="h-4 w-4 shrink-0 text-[#E5E8E8]" />
+                <IconMail class="h-4 shrink-0" />
                 <a
                   href="mailto:politikindonesiaonline@gmail.com"
                   class="text-sm hover:text-white transition-colors"
@@ -110,8 +110,12 @@
         </nav>
 
         <!-- Copyright -->
-        <div class="text-center md:text-right text-xs md:text-sm text-[#E5E8E8]">
-          <p>&copy; {{ currentYear }} Politik Indonesia. All rights reserved.</p>
+        <div
+          class="text-center md:text-right text-xs md:text-sm text-[#E5E8E8]"
+        >
+          <p>
+            &copy; {{ currentYear }} Politik Indonesia. All rights reserved.
+          </p>
         </div>
       </ContentContainer>
     </div>
@@ -129,20 +133,20 @@ import GooglePlayIcon from "~/assets/playstore.png";
 
 // Types
 interface SocialMediaLink {
-  name: string
-  icon: string
-  url: string
+  name: string;
+  icon: string;
+  url: string;
 }
 
 interface GuidelineLink {
-  name: string
-  url: string
+  name: string;
+  url: string;
 }
 
 interface AppLink {
-  name: string
-  icon: string
-  url: string
+  name: string;
+  icon: string;
+  url: string;
 }
 
 // Reactive state

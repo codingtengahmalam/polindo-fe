@@ -35,7 +35,7 @@
       </article>
       <div v-if="hasMoreNews" class="pt-1">
         <NuxtLink
-          to="/articles"
+          to=""
           class="text-brand-800 uppercase text-sm font-normal flex items-center gap-2 hover:text-brand-700 transition-colors"
           aria-label="Lihat semua berita terbaru lainnya"
         >
@@ -61,7 +61,7 @@ const latestNews = [
     dateISO: "2025-10-13T10:30:00+07:00",
     date: "13 Oct 2025",
     category: "Politik",
-    to: "/articles/presiden-polandia-bertemu-delegasi-indonesia",
+    to: "/presiden-polandia-bertemu-delegasi-indonesia",
   },
   {
     id: 2,
@@ -70,7 +70,7 @@ const latestNews = [
     dateISO: "2025-10-12T14:20:00+07:00",
     date: "12 Oct 2025",
     category: "Ekonomi",
-    to: "/articles/ekspor-kopi-indonesia-ke-polandia-meningkat",
+    to: "/ekspor-kopi-indonesia-ke-polandia-meningkat",
   },
   {
     id: 3,
@@ -80,7 +80,7 @@ const latestNews = [
     dateISO: "2025-10-12T09:45:00+07:00",
     date: "12 Oct 2025",
     category: "Pendidikan",
-    to: "/articles/mahasiswa-indonesia-juara-kompetisi-robotik-warsawa",
+    to: "/mahasiswa-indonesia-juara-kompetisi-robotik-warsawa",
   },
   {
     id: 4,
@@ -90,7 +90,7 @@ const latestNews = [
     dateISO: "2025-10-11T16:00:00+07:00",
     date: "11 Oct 2025",
     category: "Investasi",
-    to: "/articles/pengusaha-polandia-investasi-energi-terbarukan",
+    to: "/pengusaha-polandia-investasi-energi-terbarukan",
   },
   {
     id: 5,
@@ -100,7 +100,7 @@ const latestNews = [
     dateISO: "2025-10-11T15:30:00+07:00",
     date: "11 Oct 2025",
     category: "Budaya",
-    to: "/articles/festival-budaya-indonesia-di-krakow",
+    to: "/festival-budaya-indonesia-di-krakow",
   },
 ];
 
