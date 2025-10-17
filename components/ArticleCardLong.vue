@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white flex gap-4">
+  <div class="bg-white flex flex-col md:flex-row gap-4">
     <NuxtLink
       :to="`/${article.title_slug}`"
       class="block overflow-hidden rounded-t-lg bg-grayscale-5"
@@ -10,11 +10,11 @@
         width="160"
         height="160"
         sizes="160px"
-        class="w-40 h-40 object-cover rounded-t-lg transition-transform duration-300 ease-in-out hover:scale-105"
+        class="w-full md:w-40 md:h-40 object-cover rounded-t-lg transition-transform duration-300 ease-in-out hover:scale-105"
       />
     </NuxtLink>
     <div class="space-y-1">
-      <h3 class="text-title text-2xl font-semibold leading-snug line-clamp-2">
+      <h3 class="text-title text-lg md:text-2xl font-semibold leading-snug line-clamp-2">
         <NuxtLink
           :to="`/${article.title_slug}`"
           class="hover:text-brand-600 transition-colors"
