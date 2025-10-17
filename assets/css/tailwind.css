@@ -192,11 +192,9 @@
     @apply before:w-px before:bg-grayscale-10 before:-translate-x-5;
     /* Hide first item border */
     @apply first:before:hidden;
-    /* Mobile: 2 columns - hide odd items (1st column) */
-    @apply [&:nth-child(2n+1)]:before:hidden;
-    /* Desktop: 3 columns - hide every 3n+1 items (1st column) */
-    @apply md:[&:nth-child(3n+1)]:before:hidden;
-    /* Desktop: show even items that are hidden on mobile */
-    @apply md:[&:nth-child(2n+1)]:before:block;
+    /* Mobile: 1 column - hide all dividers */
+    @apply before:hidden;
+    /* Desktop (lg): 3 columns - show dividers except on first column (3n+1: items 1,4,7...) */
+    @apply lg:before:block lg:[&:nth-child(3n+1)]:before:hidden;
   }
 }
