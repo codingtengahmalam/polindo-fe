@@ -182,14 +182,14 @@
     @apply relative;
     @apply before:content-[''] before:hidden xl:before:block;
     @apply before:absolute before:left-0 before:top-0 before:bottom-0;
-    @apply before:w-px before:bg-grayscale-10 before:translate-x-5;
+    @apply before:w-px before:bg-grayscale-20 before:translate-x-5;
   }
 
   /* Grid Article Divider - Vertical line between grid columns */
   .grid-article-divider {
     @apply relative;
     @apply before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0;
-    @apply before:w-px before:bg-grayscale-10 before:-translate-x-5;
+    @apply before:w-px before:bg-grayscale-20 before:-translate-x-5;
     /* Hide first item border */
     @apply first:before:hidden;
     /* Mobile: 1 column - hide all dividers */

@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-lg" :class="{ 'space-y-5': !withBackground }">
+  <div class="bg-white flex gap-4">
     <NuxtLink
       :to="`/${article.title_slug}`"
       class="block overflow-hidden rounded-t-lg bg-grayscale-5"
@@ -7,14 +7,14 @@
       <NuxtImg
         :src="article.images.default"
         :alt="article.title"
-        width="380"
-        height="226"
-        sizes="380px"
-        class="w-full h-auto object-cover rounded-t-lg transition-transform duration-300 ease-in-out hover:scale-105"
+        width="160"
+        height="160"
+        sizes="160px"
+        class="w-40 h-40 object-cover rounded-t-lg transition-transform duration-300 ease-in-out hover:scale-105"
       />
     </NuxtLink>
-    <div class="space-y-4" :class="{ 'p-4': withBackground }">
-      <h3 class="text-title font-semibold leading-snug line-clamp-3">
+    <div class="space-y-1">
+      <h3 class="text-title text-2xl font-semibold leading-snug line-clamp-2">
         <NuxtLink
           :to="`/${article.title_slug}`"
           class="hover:text-brand-600 transition-colors"
@@ -39,13 +39,12 @@
         </time>
         <CategoryBadge
           v-if="withCategory"
-          class="ml-auto"
           :name="article.category.name"
           :slug="article.category.slug"
         />
       </div>
 
-      <p v-if="withSummary" class="text-subtitle text-sm line-clamp-3">
+      <p v-if="withSummary" class="text-subtitle text-base pt-4 line-clamp-3">
         {{ article.summary }}
       </p>
     </div>
@@ -57,7 +56,6 @@ interface Props {
   withAuthor?: boolean;
   withCategory?: boolean;
   withDate?: boolean;
-  withBackground?: boolean;
   withSummary?: boolean;
   article: {
     id: number;
@@ -93,10 +91,9 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  withAuthor: true,
+  withAuthor: false,
   withCategory: true,
-  withDate: true,
-  withBackground: false,
-  withSummary: false,
+  withDate: false,
+  withSummary: true,
 });
 </script>

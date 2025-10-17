@@ -48,7 +48,7 @@
         <div class="flex items-center gap-4">
           <!-- Search Button -->
           <NuxtLink
-            to="/search"
+            to="/cari"
             class="transition-colors text-white hover:text-brand-600"
             aria-label="Search"
           >

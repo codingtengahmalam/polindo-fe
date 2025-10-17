@@ -196,6 +196,7 @@ const relatedArticles = [
     id: 1,
     title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
     title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
+    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
     images: {
       big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
       default:
@@ -229,6 +230,7 @@ const relatedArticles = [
     id: 2,
     title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
     title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
+    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
     images: {
       big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
       default:
@@ -262,6 +264,7 @@ const relatedArticles = [
     id: 3,
     title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
     title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
+    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
     images: {
       big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
       default:
