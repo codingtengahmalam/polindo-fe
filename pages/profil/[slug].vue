@@ -13,7 +13,6 @@
           v-for="article in dummyArticles"
           :key="article.id"
           :article="article"
-          :with-category="false"
           class="grid-article-divider"
         />
       </div>
