@@ -27,18 +27,18 @@
 
           <!-- Desktop Menu (≥1024px) -->
           <ul class="hidden lg:flex items-center text-base font-semibold">
-            <li v-for="item in MAIN_MENU" :key="item.label">
+            <li v-for="category in categories?.data" :key="category.id">
               <NuxtLink
-                :to="item.to"
+                :to="`/category/${category.name_slug}`"
                 :class="[
                   'block px-2.5 py-2.5 transition-colors leading-1.3',
-                  isActiveRoute(item.to)
+                  isActiveRoute(`/category/${category.name_slug}`)
                     ? 'text-brand-600'
                     : 'text-white hover:text-brand-600'
                 ]"
-                :aria-current="isActiveRoute(item.to) ? 'page' : undefined"
+                :aria-current="isActiveRoute(`/category/${category.name_slug}`) ? 'page' : undefined"
               >
-                {{ item.label }}
+                {{ category.name }}
               </NuxtLink>
             </li>
           </ul>
@@ -48,7 +48,7 @@
         <div class="flex items-center gap-4">
           <!-- Search Button -->
           <NuxtLink
-            to="/search"
+            to="/cari"
             class="transition-colors text-white hover:text-brand-600"
             aria-label="Search"
           >
@@ -79,19 +79,19 @@
       >
         <nav class="container py-6" aria-label="Mobile navigation">
           <ul class="space-y-1">
-            <li v-for="item in MAIN_MENU" :key="item.label">
+            <li v-for="category in categories?.data" :key="category.id">
               <NuxtLink
-                :to="item.to"
+                :to="`/category/${category.name_slug}`"
                 :class="[
                   'block px-4 py-3 text-base font-semibold transition-colors leading-1.3',
-                  isActiveRoute(item.to)
+                  isActiveRoute(`/category/${category.name_slug}`)
                     ? 'text-brand-600'
                     : 'text-white'
                 ]"
-                :aria-current="isActiveRoute(item.to) ? 'page' : undefined"
+                :aria-current="isActiveRoute(`/category/${category.name_slug}`) ? 'page' : undefined"
                 @click="closeMenu"
               >
-                {{ item.label }}
+                {{ category.name }}
               </NuxtLink>
             </li>
           </ul>
@@ -112,11 +112,8 @@
 </template>
 
 <script lang="ts" setup>
-// Types
-interface MenuItem {
-  label: string;
-  to: string;
-}
+import type { CategoryListResponse } from '~/types';
+
 
 // Constants
 const HEADER_HEIGHT = "68px";
@@ -124,19 +121,21 @@ const HEADER_Z_INDEX = "z-50";
 const MOBILE_MENU_Z_INDEX = "z-40";
 const BACKDROP_Z_INDEX = "z-30";
 
-const MAIN_MENU: MenuItem[] = [
-  { label: "Politik", to: "/category/politik" },
-  { label: "Hukum", to: "/category/hukum" },
-  { label: "Ekonomi", to: "/category/ekonomi" },
-  { label: "Politisiana", to: "/category/politisiana" },
-  { label: "Wawancara", to: "/category/wawancara" },
-  { label: "Pendapat", to: "/category/pendapat" },
-  { label: "Nusantara", to: "/category/nusantara" },
-  { label: "Teknologi", to: "/category/teknologi" },
-];
-
 // Composables
 const route = useRoute();
+
+const { data: categories, error } = await useFetch<CategoryListResponse>(
+  `${useRuntimeConfig().public.apiBase}/api/v1/categories?show_on_menu=true`
+);
+
+// Handle error gracefully
+if (error.value) {
+  throw createError({
+    statusCode: error.value.statusCode || 500,
+    statusMessage: error.value.statusMessage || 'Failed to fetch categories',
+    fatal: false,
+  });
+}
 
 // Reactive state
 const isMenuOpen = ref(false);

@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-x-hidden">
+  <div class="max-w-full">
     <Header />
     <main class="min-h-[calc(100vh-80px)] pt-[68px]">
       <TrendingCarousel />

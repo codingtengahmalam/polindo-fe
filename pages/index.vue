@@ -5,7 +5,7 @@
         <HomeHotNews />
       </section>
       <section class="w-full pl-0 lg:pl-5 space-y-10">
-        <WidgetUpcomingEvent />
+        <!-- <WidgetUpcomingEvent /> -->
         <WidgetLatestNews type="latest" />
       </section>
     </div>

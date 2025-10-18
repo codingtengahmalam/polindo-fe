@@ -1,7 +1,7 @@
 <template>
   <ContentContainer class="space-y-7 my-10">
     <h1 class="text-title text-4xl font-bold flex flex-col md:flex-row items-start md:items-end gap-2">
-      Author : {{ name }}
+      Tag : {{ slugToName(slug) }}
       <span
         v-if="articles.length > 0"
         class="!text-subtitle text-2xl font-normal"
@@ -72,7 +72,6 @@
 import type { Article, ArticleListResponse, PaginationLinks } from "~/types";
 
 const route = useRoute();
-const { id, name } = route.query;
 
 const articles = ref<Article[]>([]);
 const page = ref(1);
@@ -80,13 +79,7 @@ const perPage = ref(15);
 const isLoading = ref(true);
 const links = ref<PaginationLinks>();
 
-if (!id || !name) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: "Author not found",
-    fatal: true,
-  });
-}
+const slug = route.params.slug as string;
 
 async function fetchArticles() {
   try {
@@ -95,7 +88,7 @@ async function fetchArticles() {
       `${useRuntimeConfig().public.apiBase}/api/v1/posts`,
       {
         query: {
-          user_id: id,
+          tag_slug: slug,
           page: page.value,
           per_page: perPage.value,
         },
@@ -121,6 +114,12 @@ async function fetchNextPage() {
     page.value++;
     await fetchArticles();
   }
+}
+
+function slugToName(slug: string) {
+  return slug
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 onMounted(async () => {

@@ -7,23 +7,27 @@
       Berita {{ props.type === 'latest' ? 'Terbaru' : 'Populer' }}
     </h2>
 
-    <div class="flex flex-col gap-3">
+    <!-- Loading state -->
+    <div v-if="isLoading" class="flex flex-col gap-3">
+      <div v-for="i in 4" :key="i" class="flex items-center gap-2 border-b border-grayscale-10 pb-3 last:border-b-0 last:pb-0">
+        <div class="shrink-0 w-16 h-16 bg-grayscale-10 rounded-lg animate-pulse" />
+        <div class="flex-1 space-y-2">
+          <div class="h-4 bg-grayscale-10 rounded animate-pulse" />
+          <div class="h-4 bg-grayscale-10 rounded w-3/4 animate-pulse" />
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="articles?.data && articles.data.length > 0" class="flex flex-col gap-3">
       <article
-        v-for="news in displayedNews"
-        :key="news.id"
+        v-for="article in articles?.data"
+        :key="article.id"
         class="flex items-center gap-2 border-b border-grayscale-10 pb-3 last:border-b-0 last:pb-0"
       >
-        <time
-          v-if="props.type === 'latest'"
-          :datetime="news.dateISO"
-          class="text-xs text-brand-600 size-16 aspect-square shrink-0 flex items-center font-semibold"
-        >
-          {{ news.time }}
-        </time>
-        <NuxtLink v-if="props.type === 'popular'" :to="news.to" class="shrink-0 overflow-hidden rounded-lg bg-grayscale-5">
+        <NuxtLink v-if="props.type === 'popular'" :to="`/${article.title_slug}`" class="shrink-0 overflow-hidden rounded-lg bg-grayscale-5">
           <NuxtImg
-            :src="news.image"
-            :alt="news.title"
+            :src="article.images?.big"
+            :alt="article.title"
             width="64"
             height="64"
             sizes="64px"
@@ -31,16 +35,23 @@
             loading="lazy"
           />
         </NuxtLink>
+        <time
+          v-if="props.type === 'latest'"
+          :datetime="article.created_at"
+          class="text-xs text-brand-600 size-16 aspect-square shrink-0 flex items-center font-semibold"
+        >
+          {{ relativeTime(article.created_at) }}
+        </time>
         <div class="flex flex-col items-start gap-3">
           <h3 class="w-full text-title text-sm font-semibold line-clamp-3">
             <NuxtLink
-              :to="news.to"
+              :to="`/${article.title_slug}`"
               class="hover:text-brand-600 transition-colors"
             >
-              {{ news.title }}
+              {{ article.title }}
             </NuxtLink>
           </h3>
-          <CategoryBadge :name="news.category" :slug="news.category" />
+          <CategoryBadge :name="article.category?.name || ''" :slug="article.category?.slug || ''" />
         </div>
       </article>
       <div v-if="hasMoreNews" class="pt-1">
@@ -54,10 +65,14 @@
         </NuxtLink>
       </div>
     </div>
+    <div v-else class="text-subtitle text-sm text-center py-4">
+      Tidak ada berita tersedia saat ini.
+    </div>
   </aside>
 </template>
 
 <script lang="ts" setup>
+import type { ArticleListResponse } from '~/types';
 
 interface Props {
   type: 'latest' | 'popular';
@@ -65,73 +80,27 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Constants
-const MAX_DISPLAYED_NEWS = 4;
+const articles = ref<ArticleListResponse | null>(null);
+const isLoading = ref(true);
 
-// Dummy data
-const latestNews = [
-  {
-    id: 1,
-    title:
-      "Presiden Polandia Bertemu Delegasi Indonesia Bahas Kerjasama Bilateral",
-    time: "5 min",
-    dateISO: "2025-10-13T10:30:00+07:00",
-    date: "13 Oct 2025",
-    category: "Politik",
-    to: "/presiden-polandia-bertemu-delegasi-indonesia",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-  },
-  {
-    id: 2,
-    title: "Ekspor Kopi Indonesia ke Polandia Meningkat 45% di Kuartal III",
-    time: "12 min",
-    dateISO: "2025-10-12T14:20:00+07:00",
-    date: "12 Oct 2025",
-    category: "Ekonomi",
-    to: "/ekspor-kopi-indonesia-ke-polandia-meningkat",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-  },
-  {
-    id: 3,
-    title:
-      "Mahasiswa Indonesia Raih Juara di Kompetisi Robotik Internasional Warsawa",
-    time: "25 min",
-    dateISO: "2025-10-12T09:45:00+07:00",
-    date: "12 Oct 2025",
-    category: "Pendidikan",
-    to: "/mahasiswa-indonesia-juara-kompetisi-robotik-warsawa",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-  },
-  {
-    id: 4,
-    title:
-      "Pengusaha Polandia Tertarik Investasi di Sektor Energi Terbarukan Indonesia",
-    time: "1 jam",
-    dateISO: "2025-10-11T16:00:00+07:00",
-    date: "11 Oct 2025",
-    category: "Investasi",
-    to: "/pengusaha-polandia-investasi-energi-terbarukan",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-  },
-  {
-    id: 5,
-    title:
-      "Festival Budaya Indonesia di Kraków Sukses Dihadiri 5000 Pengunjung",
-    time: "2 jam",
-    dateISO: "2025-10-11T15:30:00+07:00",
-    date: "11 Oct 2025",
-    category: "Budaya",
-    to: "/festival-budaya-indonesia-di-krakow",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-  },
-];
+// Fetch data client-side only
+onMounted(async () => {
+  try {
+    const config = useRuntimeConfig();
+    const endpoint = props.type === 'latest'
+      ? `${config.public.apiBase}/api/v1/posts?per_page=5`
+      : `${config.public.apiBase}/api/v1/posts/popular?limit=5`;
 
-// Computed properties
-const displayedNews = computed(() => {
-  return latestNews.slice(0, MAX_DISPLAYED_NEWS);
+    articles.value = await $fetch<ArticleListResponse>(endpoint);
+  } catch (error) {
+    console.error(`Failed to fetch ${props.type} articles:`, error);
+    articles.value = null;
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 const hasMoreNews = computed(() => {
-  return latestNews.length > MAX_DISPLAYED_NEWS;
+  return articles.value?.links?.next !== null;
 });
 </script>
