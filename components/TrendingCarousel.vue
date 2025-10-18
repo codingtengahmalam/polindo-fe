@@ -23,7 +23,7 @@
             <!-- Clone of last item for seamless loop (next) -->
             <NuxtLink
               v-if="lastItem"
-              :to="lastItem.link"
+              :to="`/${lastItem.title_slug}`"
               class="text-xs md:text-sm text-subtitle whitespace-nowrap flex-shrink-0 w-full"
               tabindex="-1"
             >
@@ -34,9 +34,9 @@
 
             <!-- Original items -->
             <NuxtLink
-              v-for="item in dummyData"
+              v-for="item in trendingData"
               :key="item.id"
-              :to="item.link"
+              :to="`/${item.title_slug}`"
               class="text-xs md:text-sm text-subtitle whitespace-nowrap flex-shrink-0 w-full"
             >
               <span class="overflow-hidden text-ellipsis block">
@@ -47,7 +47,7 @@
             <!-- Clone of first item for seamless loop (prev) -->
             <NuxtLink
               v-if="firstItem"
-              :to="firstItem.link"
+              :to="`/${firstItem.title_slug}`"
               class="text-xs md:text-sm text-subtitle whitespace-nowrap flex-shrink-0 w-full"
               tabindex="-1"
             >
@@ -83,34 +83,13 @@
 </template>
 
 <script lang="ts" setup>
+import type { Article, ArticleListResponse } from '~/types'
+
 // Constants
 const SLIDE_DURATION = 800 // milliseconds
 const AUTO_SLIDE_INTERVAL = 5000 // milliseconds
 
-interface TrendingItem {
-  id: number
-  title: string
-  link: string
-}
-
-// TODO: Replace with actual API call using useFetch
-const dummyData: TrendingItem[] = [
-  {
-    id: 1,
-    title: 'Roy Suryo Desak KPK Tuntaskan Laporan Dugaan Korupsi Jokowi dan Keluarga',
-    link: 'https://www.google.com',
-  },
-  {
-    id: 2,
-    title: 'Wakil Presiden janjikan 19 lapangan pekerjaan',
-    link: 'https://www.google.com',
-  },
-  {
-    id: 3,
-    title: '130 Anak Keracunan MBG di Banjar Kalsel',
-    link: 'https://www.google.com',
-  },
-]
+const trendingData = ref<Article[]>([])
 
 // Reactive state
 const currentIndex = ref(1) // Start at 1 because we have a cloned item at index 0
@@ -119,12 +98,12 @@ const isTransitioning = ref(true)
 const sliderRef = ref<HTMLElement | null>(null)
 
 // Computed properties
-const firstItem = computed(() => dummyData[0])
-const lastItem = computed(() => dummyData[dummyData.length - 1])
+const firstItem = computed(() => trendingData.value[0])
+const lastItem = computed(() => trendingData.value[trendingData.value.length - 1])
 
 // Methods
 const goToNext = () => {
-  if (isSliding.value || dummyData.length === 0) return
+  if (isSliding.value || trendingData.value.length === 0) return
 
   isSliding.value = true
   isTransitioning.value = true
@@ -133,7 +112,7 @@ const goToNext = () => {
 
   setTimeout(() => {
     // If we're at the cloned last item (index = length + 1)
-    if (currentIndex.value > dummyData.length) {
+    if (currentIndex.value > trendingData.value.length) {
       // Disable transition for instant jump
       isTransitioning.value = false
       // Jump to the real first item (index 1)
@@ -151,7 +130,7 @@ const goToNext = () => {
 }
 
 const goToPrev = () => {
-  if (isSliding.value || dummyData.length === 0) return
+  if (isSliding.value || trendingData.value.length === 0) return
 
   isSliding.value = true
   isTransitioning.value = true
@@ -164,7 +143,7 @@ const goToPrev = () => {
       // Disable transition for instant jump
       isTransitioning.value = false
       // Jump to the real last item (index = length)
-      currentIndex.value = dummyData.length
+      currentIndex.value = trendingData.value.length
 
       // Re-enable transition after a tiny delay
       setTimeout(() => {
@@ -180,7 +159,7 @@ const goToPrev = () => {
 let autoSlideInterval: ReturnType<typeof setInterval> | null = null
 
 const startAutoSlide = () => {
-  if (dummyData.length <= 1) return
+  if (trendingData.value.length <= 1) return
 
   autoSlideInterval = setInterval(() => {
     goToNext()
@@ -194,8 +173,20 @@ const stopAutoSlide = () => {
   }
 }
 
+async function getTrendingData() {
+  try {
+    const response = await $fetch<ArticleListResponse>(`${useRuntimeConfig().public.apiBase}/api/v1/posts/trending`)
+
+    trendingData.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch trending data:', error)
+    trendingData.value = []
+  }
+}
+
 // Lifecycle hooks
-onMounted(() => {
+onMounted(async () => {
+  await getTrendingData()
   startAutoSlide()
 })
 

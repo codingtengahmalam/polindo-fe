@@ -6,9 +6,9 @@
 
     <!-- Main News of Hot News -->
     <article v-if="mainNews" class="space-y-4">
-      <NuxtLink :to="`/${mainNews.slug}`" class="block overflow-hidden rounded-lg bg-grayscale-5">
+      <NuxtLink :to="`/${mainNews.title_slug}`" class="block overflow-hidden rounded-lg bg-grayscale-5">
         <NuxtImg
-          :src="mainNews.image"
+          :src="mainNews.images?.big"
           :alt="mainNews.title"
           width="720"
           height="400"
@@ -20,14 +20,14 @@
       </NuxtLink>
       <div class="space-y-1 pb-5 border-b border-grayscale-10">
         <div class="text-grayscale-40 font-normal flex items-center gap-2">
-          <time :datetime="mainNews.dateISO" class="text-xs">
-            {{ mainNews.date }}
+          <time :datetime="mainNews.created_at" class="text-xs">
+            {{ relativeTime(mainNews.created_at) }}
           </time>
-          <CategoryBadge :name="mainNews.category" :slug="mainNews.category" />
+          <CategoryBadge :name="mainNews.category?.name || ''" :slug="mainNews.category?.slug || ''" />
         </div>
         <h3 class="text-title text-2xl font-playfair font-bold">
           <NuxtLink
-            :to="`/${mainNews.slug}`"
+            :to="`/${mainNews.title_slug}`"
             class="hover:text-brand-600 transition-colors"
           >
             {{ mainNews.title }}
@@ -40,28 +40,28 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <article
         v-for="news in secondaryNews"
-        :key="news.slug"
+        :key="news.id"
         class="flex items-center gap-2 py-3 border-b border-grayscale-10"
       >
         <div class="w-full h-auto">
           <div class="text-grayscale-40 font-normal flex items-center gap-2">
-            <time :datetime="news.dateISO" class="text-xs">
-              {{ news.date }}
+            <time :datetime="news.created_at" class="text-xs">
+              {{ relativeTime(news.created_at) }}
             </time>
-            <CategoryBadge :name="news.category" :slug="news.category" />
+            <CategoryBadge :name="news.category?.name || ''" :slug="news.category?.slug || ''" />
           </div>
           <h3 class="text-title text-lg font-playfair font-bold">
             <NuxtLink
-              :to="`/${news.slug}`"
+              :to="`/${news.title_slug}`"
               class="hover:text-brand-600 transition-colors"
             >
               {{ news.title }}
             </NuxtLink>
           </h3>
         </div>
-        <NuxtLink :to="`/${news.slug}`" class="shrink-0 overflow-hidden rounded-lg bg-grayscale-5">
+        <NuxtLink :to="`/${news.title_slug}`" class="shrink-0 overflow-hidden rounded-lg bg-grayscale-5">
           <NuxtImg
-            :src="news.image"
+            :src="news.images?.big"
             :alt="news.title"
             width="96"
             height="96"
@@ -76,71 +76,22 @@
 </template>
 
 <script lang="ts" setup>
-// Type definition for news item
-interface NewsItem {
-  slug: string;
-  title: string;
-  image: string;
-  date: string;
-  dateISO: string;
-  category: string;
-  isHighlightNews: boolean;
+import type { ArticleListResponse } from '~/types';
+
+
+const { data: articles, error } = await useFetch<ArticleListResponse>(
+  `${useRuntimeConfig().public.apiBase}/api/v1/posts/popular?limit=5`
+);
+
+// Handle error gracefully
+if (error.value) {
+  throw createError({
+    statusCode: error.value.statusCode || 500,
+    statusMessage: error.value.statusMessage || 'Failed to fetch hot news',
+    fatal: false,
+  });
 }
 
-// Dummy data - In production, this should come from API with useFetch
-const hotNews: NewsItem[] = [
-  {
-    slug: "mantan-pj-bupati-cilacap-didakwa-korupsi",
-    title:
-      "Mantan Pj Bupati Cilacap Didakwa Korupsi Rugikan Negara Rp 237 Miliar",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-    date: "12 Oct 2025",
-    dateISO: "2025-10-12",
-    category: "Hukum",
-    isHighlightNews: true,
-  },
-  {
-    slug: "polda-ntb-serahkan-tersangka-kematian-brigadir-nurhadi",
-    title: "Polda NTB Serahkan 2 Tersangka Kematian Brigadir Nurhadi ke JPU",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-    date: "11 Oct 2025",
-    dateISO: "2025-10-11",
-    category: "Hukum",
-    isHighlightNews: false,
-  },
-  {
-    slug: "presiden-jokowi-resmikan-tol-trans-sumatera",
-    title:
-      "Presiden Jokowi Resmikan Jalan Tol Trans Sumatera Sepanjang 2.765 Km",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-    date: "11 Oct 2025",
-    dateISO: "2025-10-11",
-    category: "Infrastruktur",
-    isHighlightNews: false,
-  },
-  {
-    slug: "menteri-esdm-targetkan-energi-terbarukan-2025",
-    title: "Menteri ESDM Targetkan Energi Terbarukan Capai 23% di Tahun 2025",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-    date: "10 Oct 2025",
-    dateISO: "2025-10-10",
-    category: "Ekonomi",
-    isHighlightNews: false,
-  },
-  {
-    slug: "dpr-setujui-ruu-kesehatan",
-    title: "DPR Setujui RUU Kesehatan, Fokus Perkuat Layanan Primer",
-    image: "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-    date: "10 Oct 2025",
-    dateISO: "2025-10-10",
-    category: "Politik",
-    isHighlightNews: false,
-  },
-];
-
-// Computed properties untuk memisahkan berita utama dan sekunder
-const mainNews = computed(() => hotNews.find((news) => news.isHighlightNews));
-const secondaryNews = computed(() =>
-  hotNews.filter((news) => !news.isHighlightNews)
-);
+const mainNews = computed(() => articles.value?.data[0]);
+const secondaryNews = computed(() => articles.value?.data.slice(1));
 </script>

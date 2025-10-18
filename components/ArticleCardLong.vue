@@ -2,15 +2,15 @@
   <div class="bg-white flex flex-col md:flex-row gap-4">
     <NuxtLink
       :to="`/${article.title_slug}`"
-      class="block overflow-hidden rounded-t-lg bg-grayscale-5"
+      class="block overflow-hidden rounded-lg bg-grayscale-5 shrink-0 w-full md:w-40 h-40"
     >
       <NuxtImg
-        :src="article.images.default"
+        :src="article.images?.default"
         :alt="article.title"
         width="160"
         height="160"
         sizes="160px"
-        class="w-full md:w-40 md:h-40 object-cover rounded-t-lg transition-transform duration-300 ease-in-out hover:scale-105"
+        class="w-full h-full object-cover rounded-lg transition-transform duration-300 ease-in-out hover:scale-105"
       />
     </NuxtLink>
     <div class="space-y-1">
@@ -26,8 +26,9 @@
       <div class="flex items-center text-xs gap-1">
         <Author
           v-if="withAuthor"
-          :name="article.author.display_name"
-          :slug="article.author.slug"
+          :id="article.author?.id ?? 0"
+          :name="article.author?.display_name ?? ''"
+          :slug="article.author?.slug ?? ''"
         />
         <span v-if="withAuthor && withDate" class="text-grayscale-40">•</span>
         <time
@@ -39,8 +40,8 @@
         </time>
         <CategoryBadge
           v-if="withCategory"
-          :name="article.category.name"
-          :slug="article.category.slug"
+          :name="article.category?.name ?? ''"
+          :slug="article.category?.slug ?? ''"
         />
       </div>
 
@@ -52,42 +53,14 @@
 </template>
 
 <script lang="ts" setup>
+import type { Article } from '~/types';
+
 interface Props {
   withAuthor?: boolean;
   withCategory?: boolean;
   withDate?: boolean;
   withSummary?: boolean;
-  article: {
-    id: number;
-    title: string;
-    title_slug: string;
-    summary: string | null;
-    images: {
-      big: string;
-      default: string;
-      slider: string;
-      mid: string;
-      small: string;
-      url: string;
-      mime: string;
-      description: string | null;
-    };
-    category: {
-      id: number;
-      name: string;
-      slug: string;
-      description: string | null;
-      color: string;
-    };
-    author: {
-      id: number;
-      username: string;
-      slug: string;
-      avatar: string | null;
-      display_name: string;
-    };
-    created_at: string;
-  };
+  article: Article;
 }
 
 const props = withDefaults(defineProps<Props>(), {

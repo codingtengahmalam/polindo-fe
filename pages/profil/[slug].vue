@@ -1,8 +1,12 @@
 <template>
   <ContentContainer class="space-y-7 my-10">
-    <h1 class="text-title text-4xl font-bold flex items-end gap-2">
-      Author : Nur Iwan Tri Hendrawan
-      <span class="!text-subtitle text-2xl font-normal">(129 Artikel)</span>
+    <h1 class="text-title text-4xl font-bold flex flex-col md:flex-row items-start md:items-end gap-2">
+      Author : {{ name }}
+      <span
+        v-if="articles.length > 0"
+        class="!text-subtitle text-2xl font-normal"
+        >({{ articles.length }} Artikel)</span
+      >
     </h1>
 
     <div class="space-y-5">
@@ -10,17 +14,51 @@
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
       >
         <ArticleCard
-          v-for="article in dummyArticles"
+          v-if="articles.length > 0"
+          v-for="article in articles"
           :key="article.id"
           :article="article"
           class="grid-article-divider"
         />
       </div>
 
+      <div v-if="isLoading">
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
+        >
+          <div
+            v-for="i in 3"
+            :key="i"
+            class="bg-white flex flex-col md:flex-row gap-4 animate-pulse"
+          >
+            <!-- Image skeleton -->
+            <div
+              class="shrink-0 w-full md:w-40 h-40 bg-grayscale-10 rounded-t-lg"
+            ></div>
+
+            <!-- Content skeleton -->
+            <div class="space-y-3 flex-1">
+              <!-- Title skeleton -->
+              <div class="space-y-2">
+                <div class="h-6 bg-grayscale-10 rounded w-full"></div>
+                <div class="h-6 bg-grayscale-10 rounded w-4/5"></div>
+              </div>
+
+              <!-- Meta info skeleton -->
+              <div class="flex items-center gap-2">
+                <div class="h-4 bg-grayscale-10 rounded w-20"></div>
+                <div class="h-4 bg-grayscale-10 rounded w-24"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <hr class="border-grayscale-10" />
 
-      <div class="flex justify-center">
+      <div v-if="hasNextPage && !isLoading" class="flex justify-center">
         <button
+          @click="fetchNextPage"
           class="text-sm p-2 border border-title rounded-lg hover:bg-grayscale-10 transition-colors"
         >
           Berita Lainnya
@@ -31,315 +69,63 @@
 </template>
 
 <script lang="ts" setup>
-// dummy data
-const dummyArticles = [
-  {
-    id: 1,
-    title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
-    title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
-    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
-    images: {
-      big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
-      default:
-        "https://politikindonesia.id/uploads/images/2024/09/image_750x_66d7b54edfa0a.jpg",
-      slider:
-        "https://politikindonesia.id/uploads/images/2024/09/image_600x460_66d7b54f08a9d.jpg",
-      mid: "https://politikindonesia.id/uploads/images/2024/09/image_380x226_66d7b54f230eb.jpg",
-      small:
-        "https://politikindonesia.id/uploads/images/2024/09/image_140x98_66d7b54f34a6b.jpg",
-      url: "https://politikindonesia.id/",
-      mime: "jpg",
-      description: "Ilustrasi Akun Fufufafa. /Polindo",
-    },
-    author: {
-      id: 10,
-      username: "Nita Nawangwulan",
-      slug: "nita",
-      avatar: null,
-      display_name: "Nita Nawangwulan",
-    },
-    category: {
-      id: 6,
-      name: "PENDAPAT",
-      slug: "pendapat",
-      description: null,
-      color: "#ff0000",
-    },
-    created_at: "2025-06-02T10:45:22.000000Z",
-  },
-  {
-    id: 2,
-    title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
-    title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
-    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
-    images: {
-      big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
-      default:
-        "https://politikindonesia.id/uploads/images/2024/09/image_750x_66d7b54edfa0a.jpg",
-      slider:
-        "https://politikindonesia.id/uploads/images/2024/09/image_600x460_66d7b54f08a9d.jpg",
-      mid: "https://politikindonesia.id/uploads/images/2024/09/image_380x226_66d7b54f230eb.jpg",
-      small:
-        "https://politikindonesia.id/uploads/images/2024/09/image_140x98_66d7b54f34a6b.jpg",
-      url: "https://politikindonesia.id/",
-      mime: "jpg",
-      description: "Ilustrasi Akun Fufufafa. /Polindo",
-    },
-    author: {
-      id: 10,
-      username: "Nita Nawangwulan",
-      slug: "nita",
-      avatar: null,
-      display_name: "Nita Nawangwulan",
-    },
-    category: {
-      id: 6,
-      name: "PENDAPAT",
-      slug: "pendapat",
-      description: null,
-      color: "#ff0000",
-    },
-    created_at: "2025-06-02T10:45:22.000000Z",
-  },
-  {
-    id: 3,
-    title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
-    title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
-    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
-    images: {
-      big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
-      default:
-        "https://politikindonesia.id/uploads/images/2024/09/image_750x_66d7b54edfa0a.jpg",
-      slider:
-        "https://politikindonesia.id/uploads/images/2024/09/image_600x460_66d7b54f08a9d.jpg",
-      mid: "https://politikindonesia.id/uploads/images/2024/09/image_380x226_66d7b54f230eb.jpg",
-      small:
-        "https://politikindonesia.id/uploads/images/2024/09/image_140x98_66d7b54f34a6b.jpg",
-      url: "https://politikindonesia.id/",
-      mime: "jpg",
-      description: "Ilustrasi Akun Fufufafa. /Polindo",
-    },
-    author: {
-      id: 10,
-      username: "Nita Nawangwulan",
-      slug: "nita",
-      avatar: null,
-      display_name: "Nita Nawangwulan",
-    },
-    category: {
-      id: 6,
-      name: "PENDAPAT",
-      slug: "pendapat",
-      description: null,
-      color: "#ff0000",
-    },
-    created_at: "2025-06-02T10:45:22.000000Z",
-  },
-  {
-    id: 1,
-    title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
-    title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
-    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
-    images: {
-      big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
-      default:
-        "https://politikindonesia.id/uploads/images/2024/09/image_750x_66d7b54edfa0a.jpg",
-      slider:
-        "https://politikindonesia.id/uploads/images/2024/09/image_600x460_66d7b54f08a9d.jpg",
-      mid: "https://politikindonesia.id/uploads/images/2024/09/image_380x226_66d7b54f230eb.jpg",
-      small:
-        "https://politikindonesia.id/uploads/images/2024/09/image_140x98_66d7b54f34a6b.jpg",
-      url: "https://politikindonesia.id/",
-      mime: "jpg",
-      description: "Ilustrasi Akun Fufufafa. /Polindo",
-    },
-    author: {
-      id: 10,
-      username: "Nita Nawangwulan",
-      slug: "nita",
-      avatar: null,
-      display_name: "Nita Nawangwulan",
-    },
-    category: {
-      id: 6,
-      name: "PENDAPAT",
-      slug: "pendapat",
-      description: null,
-      color: "#ff0000",
-    },
-    created_at: "2025-06-02T10:45:22.000000Z",
-  },
-  {
-    id: 2,
-    title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
-    title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
-    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
-    images: {
-      big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
-      default:
-        "https://politikindonesia.id/uploads/images/2024/09/image_750x_66d7b54edfa0a.jpg",
-      slider:
-        "https://politikindonesia.id/uploads/images/2024/09/image_600x460_66d7b54f08a9d.jpg",
-      mid: "https://politikindonesia.id/uploads/images/2024/09/image_380x226_66d7b54f230eb.jpg",
-      small:
-        "https://politikindonesia.id/uploads/images/2024/09/image_140x98_66d7b54f34a6b.jpg",
-      url: "https://politikindonesia.id/",
-      mime: "jpg",
-      description: "Ilustrasi Akun Fufufafa. /Polindo",
-    },
-    author: {
-      id: 10,
-      username: "Nita Nawangwulan",
-      slug: "nita",
-      avatar: null,
-      display_name: "Nita Nawangwulan",
-    },
-    category: {
-      id: 6,
-      name: "PENDAPAT",
-      slug: "pendapat",
-      description: null,
-      color: "#ff0000",
-    },
-    created_at: "2025-06-02T10:45:22.000000Z",
-  },
-  {
-    id: 3,
-    title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
-    title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
-    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
-    images: {
-      big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
-      default:
-        "https://politikindonesia.id/uploads/images/2024/09/image_750x_66d7b54edfa0a.jpg",
-      slider:
-        "https://politikindonesia.id/uploads/images/2024/09/image_600x460_66d7b54f08a9d.jpg",
-      mid: "https://politikindonesia.id/uploads/images/2024/09/image_380x226_66d7b54f230eb.jpg",
-      small:
-        "https://politikindonesia.id/uploads/images/2024/09/image_140x98_66d7b54f34a6b.jpg",
-      url: "https://politikindonesia.id/",
-      mime: "jpg",
-      description: "Ilustrasi Akun Fufufafa. /Polindo",
-    },
-    author: {
-      id: 10,
-      username: "Nita Nawangwulan",
-      slug: "nita",
-      avatar: null,
-      display_name: "Nita Nawangwulan",
-    },
-    category: {
-      id: 6,
-      name: "PENDAPAT",
-      slug: "pendapat",
-      description: null,
-      color: "#ff0000",
-    },
-    created_at: "2025-06-02T10:45:22.000000Z",
-  },
-  {
-    id: 1,
-    title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
-    title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
-    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
-    images: {
-      big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
-      default:
-        "https://politikindonesia.id/uploads/images/2024/09/image_750x_66d7b54edfa0a.jpg",
-      slider:
-        "https://politikindonesia.id/uploads/images/2024/09/image_600x460_66d7b54f08a9d.jpg",
-      mid: "https://politikindonesia.id/uploads/images/2024/09/image_380x226_66d7b54f230eb.jpg",
-      small:
-        "https://politikindonesia.id/uploads/images/2024/09/image_140x98_66d7b54f34a6b.jpg",
-      url: "https://politikindonesia.id/",
-      mime: "jpg",
-      description: "Ilustrasi Akun Fufufafa. /Polindo",
-    },
-    author: {
-      id: 10,
-      username: "Nita Nawangwulan",
-      slug: "nita",
-      avatar: null,
-      display_name: "Nita Nawangwulan",
-    },
-    category: {
-      id: 6,
-      name: "PENDAPAT",
-      slug: "pendapat",
-      description: null,
-      color: "#ff0000",
-    },
-    created_at: "2025-06-02T10:45:22.000000Z",
-  },
-  {
-    id: 2,
-    title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
-    title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
-    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
-    images: {
-      big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
-      default:
-        "https://politikindonesia.id/uploads/images/2024/09/image_750x_66d7b54edfa0a.jpg",
-      slider:
-        "https://politikindonesia.id/uploads/images/2024/09/image_600x460_66d7b54f08a9d.jpg",
-      mid: "https://politikindonesia.id/uploads/images/2024/09/image_380x226_66d7b54f230eb.jpg",
-      small:
-        "https://politikindonesia.id/uploads/images/2024/09/image_140x98_66d7b54f34a6b.jpg",
-      url: "https://politikindonesia.id/",
-      mime: "jpg",
-      description: "Ilustrasi Akun Fufufafa. /Polindo",
-    },
-    author: {
-      id: 10,
-      username: "Nita Nawangwulan",
-      slug: "nita",
-      avatar: null,
-      display_name: "Nita Nawangwulan",
-    },
-    category: {
-      id: 6,
-      name: "PENDAPAT",
-      slug: "pendapat",
-      description: null,
-      color: "#ff0000",
-    },
-    created_at: "2025-06-02T10:45:22.000000Z",
-  },
-  {
-    id: 3,
-    title: "Fufufafa Pintu Masuk Pemakzulan Gibran",
-    title_slug: "fufufafa-pintu-masuk-pemakzulan-gibran",
-    summary: "Wacana pemakzulan Gibran Rakabuming Raka dari jabatan wakil presiden berpotensi menjadi bom waktu politik di Indonesia.",
-    images: {
-      big: "https://politikindonesia.id/uploads/images/2024/09/image_750x500_66d7b54ec0101.jpg",
-      default:
-        "https://politikindonesia.id/uploads/images/2024/09/image_750x_66d7b54edfa0a.jpg",
-      slider:
-        "https://politikindonesia.id/uploads/images/2024/09/image_600x460_66d7b54f08a9d.jpg",
-      mid: "https://politikindonesia.id/uploads/images/2024/09/image_380x226_66d7b54f230eb.jpg",
-      small:
-        "https://politikindonesia.id/uploads/images/2024/09/image_140x98_66d7b54f34a6b.jpg",
-      url: "https://politikindonesia.id/",
-      mime: "jpg",
-      description: "Ilustrasi Akun Fufufafa. /Polindo",
-    },
-    author: {
-      id: 10,
-      username: "Nita Nawangwulan",
-      slug: "nita",
-      avatar: null,
-      display_name: "Nita Nawangwulan",
-    },
-    category: {
-      id: 6,
-      name: "PENDAPAT",
-      slug: "pendapat",
-      description: null,
-      color: "#ff0000",
-    },
-    created_at: "2025-06-02T10:45:22.000000Z",
-  },
-];
+import type { Article, ArticleListResponse, PaginationLinks } from "~/types";
+
+const route = useRoute();
+const { id, name } = route.query;
+
+const articles = ref<Article[]>([]);
+const page = ref(1);
+const perPage = ref(15);
+const isLoading = ref(true);
+const links = ref<PaginationLinks>();
+
+if (!id || !name) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: "Author not found",
+    fatal: true,
+  });
+}
+
+async function fetchArticles() {
+  try {
+    isLoading.value = true;
+    const response = await $fetch<ArticleListResponse>(
+      `${useRuntimeConfig().public.apiBase}/api/v1/posts`,
+      {
+        query: {
+          user_id: id,
+          page: page.value,
+          per_page: perPage.value,
+        },
+      }
+    );
+
+    const data = response?.data || [];
+    links.value = response?.links || {};
+    articles.value.push(...data);
+  } catch (error) {
+    console.error("Failed to fetch articles:", error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+const hasNextPage = computed(() => {
+  return links.value?.next !== null;
+});
+
+async function fetchNextPage() {
+  if (hasNextPage.value) {
+    page.value++;
+    await fetchArticles();
+  }
+}
+
+onMounted(async () => {
+  await fetchArticles();
+});
 </script>
 
 <style></style>

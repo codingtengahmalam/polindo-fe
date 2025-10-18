@@ -5,12 +5,12 @@
       class="block overflow-hidden rounded-t-lg bg-grayscale-5"
     >
       <NuxtImg
-        :src="article.images.default"
+        :src="article.images?.default"
         :alt="article.title"
         width="380"
-        height="226"
         sizes="380px"
-        class="w-full h-auto object-cover rounded-t-lg transition-transform duration-300 ease-in-out hover:scale-105"
+        class="w-full object-cover rounded-t-lg transition-transform duration-300 ease-in-out hover:scale-105"
+        :class="imgHeight"
       />
     </NuxtLink>
     <div class="space-y-4" :class="{ 'p-4': withBackground }">
@@ -26,8 +26,9 @@
       <div class="flex items-center text-xs gap-1">
         <Author
           v-if="withAuthor"
-          :name="article.author.display_name"
-          :slug="article.author.slug"
+          :id="article.author?.id ?? 0"
+          :name="article.author?.display_name ?? ''"
+          :slug="article.author?.slug ?? ''"
         />
         <span v-if="withAuthor && withDate" class="text-grayscale-40">•</span>
         <time
@@ -40,8 +41,8 @@
         <CategoryBadge
           v-if="withCategory"
           class="ml-auto"
-          :name="article.category.name"
-          :slug="article.category.slug"
+          :name="article.category?.name ?? ''"
+          :slug="article.category?.slug ?? ''"
         />
       </div>
 
@@ -53,43 +54,16 @@
 </template>
 
 <script lang="ts" setup>
+import type { Article } from '~/types';
+
 interface Props {
   withAuthor?: boolean;
   withCategory?: boolean;
   withDate?: boolean;
   withBackground?: boolean;
   withSummary?: boolean;
-  article: {
-    id: number;
-    title: string;
-    title_slug: string;
-    summary: string | null;
-    images: {
-      big: string;
-      default: string;
-      slider: string;
-      mid: string;
-      small: string;
-      url: string;
-      mime: string;
-      description: string | null;
-    };
-    category: {
-      id: number;
-      name: string;
-      slug: string;
-      description: string | null;
-      color: string;
-    };
-    author: {
-      id: number;
-      username: string;
-      slug: string;
-      avatar: string | null;
-      display_name: string;
-    };
-    created_at: string;
-  };
+  article: Article;
+  imgHeight?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -98,5 +72,6 @@ const props = withDefaults(defineProps<Props>(), {
   withDate: true,
   withBackground: false,
   withSummary: false,
+  imgHeight: 'h-52',
 });
 </script>

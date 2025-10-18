@@ -13,10 +13,10 @@
           <button
             type="button"
             aria-label="Previous video"
-            :disabled="currentPage === 0"
+            :disabled="!hasPrevPage || isLoading"
             :class="[
               'cursor-pointer transition-colors',
-              currentPage === 0
+              !hasPrevPage || isLoading
                 ? 'opacity-30 cursor-not-allowed'
                 : 'hover:text-grayscale-100',
             ]"
@@ -27,10 +27,10 @@
           <button
             type="button"
             aria-label="Next video"
-            :disabled="currentPage >= totalPages - 1"
+            :disabled="!hasNextPage || isLoading"
             :class="[
               'cursor-pointer transition-colors',
-              currentPage >= totalPages - 1
+              !hasNextPage || isLoading
                 ? 'opacity-30 cursor-not-allowed'
                 : 'hover:text-grayscale-100',
             ]"
@@ -44,39 +44,47 @@
       <!-- Content Video -->
       <div class="overflow-hidden">
         <ClientOnly>
+          <!-- Loading State -->
           <div
-            class="grid gap-4 transition-transform duration-500 ease-in-out"
+            v-if="isLoading"
+            class="grid gap-4"
             :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
-            :style="gridStyle"
           >
-            <!-- Only render visible videos (current page + adjacent pages for preloading) -->
+            <div
+              v-for="i in (isMobile ? 1 : 4)"
+              :key="i"
+              class="w-full aspect-[9/16] rounded-lg bg-grayscale-20 animate-pulse"
+            />
+          </div>
+
+          <!-- Videos Grid -->
+          <div
+            v-else
+            class="grid gap-4 transition-opacity duration-300"
+            :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
+          >
             <!-- the controls always show in IOS -->
             <!-- #t=0.001 for fix thumbnail video not render in IOS -->
-            <template v-for="(video, index) in DUMMY_VIDEOS" :key="video.id">
-              <video
-                v-if="shouldRenderVideo(index)"
-                :ref="(el) => setVideoRef(el, video.id, index)"
-                :controls="isIOS || activeVideoId === video.id"
-                :src="`${video.url}#t=0.001`"
-                preload="metadata"
-                controlsList="nodownload"
-                disablePictureInPicture
-                playsinline
-                class="w-full aspect-[9/16] object-cover rounded-lg"
-                @play="handlePlay(video.id)"
-                @mouseenter="handleMouseEnter(video.id)"
-                @mouseleave="handleMouseLeave(video.id)"
-                @touchstart="handleTouchStart(video.id)"
-              >
-                Your browser doesn't support video formats.
-              </video>
-              <!-- Placeholder for non-visible videos to maintain grid layout -->
-              <div
-                v-else
-                class="w-full aspect-[9/16] rounded-lg bg-grayscale-20"
-              />
-            </template>
+            <video
+              v-for="(video, index) in videos?.data"
+              :key="video.id"
+              :ref="(el) => setVideoRef(el, video.id, index)"
+              :controls="isIOS || activeVideoId === video.id"
+              :src="`${video.video_path}#t=0.001`"
+              preload="metadata"
+              controlsList="nodownload"
+              disablePictureInPicture
+              playsinline
+              class="w-full aspect-[9/16] object-cover rounded-lg"
+              @play="handlePlay(video.id)"
+              @mouseenter="handleMouseEnter(video.id)"
+              @mouseleave="handleMouseLeave(video.id)"
+              @touchstart="handleTouchStart(video.id)"
+            >
+              Your browser doesn't support video formats.
+            </video>
           </div>
+
           <template #fallback>
             <div
               class="grid gap-4"
@@ -96,76 +104,84 @@
 </template>
 
 <script lang="ts" setup>
+import type { VideoPostListResponse } from '~/types'
 import { isIOSDevice } from '~/utils/device'
 
-const DUMMY_VIDEOS = [
-  {
-    id: 1,
-    title: 'Video 1',
-    url: 'https://politikindonesia.id/uploads/videos/2025/10/pengamat-otomotif.mp4',
-  },
-  {
-    id: 2,
-    title: 'Video 2',
-    url: 'https://politikindonesia.id/uploads/videos/2025/10/ini-alasan.mp4',
-  },
-  {
-    id: 3,
-    title: 'Video 3',
-    url: 'https://politikindonesia.id/uploads/videos/2025/10/istana-bongkar.mp4',
-  },
-  {
-    id: 4,
-    title: 'Video 4',
-    url: 'https://politikindonesia.id/uploads/videos/2025/10/rocky-gerung-menduga.mp4',
-  },
-  {
-    id: 5,
-    title: 'Video 5',
-    url: 'https://politikindonesia.id/uploads/videos/2025/10/pengamat-otomotif.mp4',
-  },
-  {
-    id: 6,
-    title: 'Video 6',
-    url: 'https://politikindonesia.id/uploads/videos/2025/10/ini-alasan.mp4',
-  },
-]
-
-// Responsive video carousel state (automatically reactive to window resize)
+const isIOS = computed(() => isIOSDevice())
 const { isMobile, videosPerPage, calculateGridStyle } =
   useVideoCarouselResponsive()
 
-// Video carousel management
+// API state
+const videos = ref<VideoPostListResponse>()
+const currentPage = ref<number>(1)
+const isLoading = ref(false)
+
+// Computed perPage based on screen size (mobile: 1, desktop: 4)
+const perPage = computed(() => videosPerPage.value)
+
+// Computed: Check if has next/prev page from API links
+const hasNextPage = computed(() => videos.value?.links?.next !== null)
+const hasPrevPage = computed(() => videos.value?.links?.prev !== null)
+
 const {
   activeVideoId,
-  currentPage,
-  totalPages,
-  shouldRenderVideo,
-  isCurrentPageVideo,
   setVideoRef,
   handlePlay,
   handleMouseEnter,
   handleMouseLeave,
   handleTouchStart,
-  goToNext,
-  goToPrev,
-  resetToFirstPage,
+  pauseAllVideos,
   clearAllVideoRefs,
-} = useVideoCarousel(DUMMY_VIDEOS, videosPerPage)
+} = useVideoCarousel([], videosPerPage)
 
-const isIOS = computed(() => isIOSDevice())
+async function getVideos() {
+  try {
+    isLoading.value = true
+    const response = await $fetch<VideoPostListResponse>(`${useRuntimeConfig().public.apiBase}/api/v1/video-posts?${new URLSearchParams({
+      page: currentPage.value.toString(),
+      per_page: perPage.value.toString(),
+    })}`)
 
-const gridStyle = computed(() =>
-  calculateGridStyle(currentPage.value, DUMMY_VIDEOS.length)
-)
+    videos.value = response
+  } catch (error) {
+    console.error('Error fetching videos:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
 
-// Watch for mobile/desktop switch and reset carousel
+// Navigate to next page
+async function goToNext() {
+  if (hasNextPage.value && !isLoading.value) {
+    pauseAllVideos()
+    currentPage.value++
+    await getVideos()
+  }
+}
+
+// Navigate to previous page
+async function goToPrev() {
+  if (hasPrevPage.value && !isLoading.value) {
+    pauseAllVideos()
+    currentPage.value--
+    await getVideos()
+  }
+}
+
+// Watch for mobile/desktop switch and reset to page 1
 const prevIsMobile = ref(isMobile.value)
-watch(isMobile, (newValue) => {
+watch(isMobile, async (newValue) => {
   if (prevIsMobile.value !== newValue) {
-    resetToFirstPage()
+    pauseAllVideos()
+    currentPage.value = 1
+    await getVideos()
     prevIsMobile.value = newValue
   }
+})
+
+// Initial load
+onMounted(() => {
+  getVideos()
 })
 
 // Cleanup video refs on unmount
