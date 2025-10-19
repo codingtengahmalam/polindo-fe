@@ -8,6 +8,7 @@ export * from "./category";
 export * from "./article";
 export * from "./video";
 export * from "./tag";
+export * from "./setting";
 
 declare global {
   type CustomObject<T = any> = {

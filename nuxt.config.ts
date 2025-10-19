@@ -19,21 +19,6 @@ export default defineNuxtConfig({
     },
   },
 
-  app: {
-    head: {
-      viewport:
-        "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
-      meta: [
-        { charset: "utf-8" },
-        {
-          name: "viewport",
-          content:
-            "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
-        },
-      ],
-    },
-  },
-
   compatibilityDate: "2025-07-15",
   modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss", "@nuxt/image"],
 
