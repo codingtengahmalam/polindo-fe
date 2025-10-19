@@ -2,9 +2,11 @@
   <!-- This data send id & name because the API not provide author slug -->
   <NuxtLink
     :to="`/profil/${slug}?id=${id}&name=${name}`"
-    class="text-subtitle font-normal text-xs flex items-center gap-1"
+    class="text-subtitle font-normal text-xs flex items-center gap-1 min-w-0"
+    :title="`Oleh ${name}`"
   >
-    <span class="text-grayscale-40">Oleh</span> {{ name }}
+    <span class="text-grayscale-40 shrink-0">Oleh</span>
+    <span class="truncate">{{ name }}</span>
   </NuxtLink>
 </template>
 

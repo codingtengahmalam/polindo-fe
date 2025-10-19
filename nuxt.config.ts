@@ -1,10 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
   runtimeConfig: {
     public: {
-      apiBase: 'https://api.politikindonesia.id',
+      apiBase: "https://api.politikindonesia.id",
     },
   },
 
@@ -18,25 +19,11 @@ export default defineNuxtConfig({
     },
   },
 
-  app: {
-    head: {
-      viewport:
-        "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
-      meta: [
-        { charset: "utf-8" },
-        {
-          name: "viewport",
-          content:
-            "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
-        },
-      ],
-    },
-  },
-
   compatibilityDate: "2025-07-15",
   modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss", "@nuxt/image"],
 
   image: {
+    provider: process.env.NUXT_IMAGE_PROVIDER || "weserv",
     quality: 80,
     format: ["webp"],
     screens: {
@@ -48,7 +35,11 @@ export default defineNuxtConfig({
       xxl: 1536,
     },
     dir: "public",
-    domains: [],
+    domains: ["politikindonesia.id"],
+    // Weserv configuration (only used in production)
+    weserv: {
+      baseURL: "https://politikindonesia.id",
+    },
   },
 
   fonts: {
