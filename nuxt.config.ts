@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
@@ -37,7 +38,7 @@ export default defineNuxtConfig({
   modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss", "@nuxt/image"],
 
   image: {
-    provider: "weserv",
+    provider: process.env.NUXT_IMAGE_PROVIDER || "weserv",
     quality: 80,
     format: ["webp"],
     screens: {
@@ -50,6 +51,10 @@ export default defineNuxtConfig({
     },
     dir: "public",
     domains: ["politikindonesia.id"],
+    // Weserv configuration (only used in production)
+    weserv: {
+      baseURL: "https://politikindonesia.id",
+    },
   },
 
   fonts: {

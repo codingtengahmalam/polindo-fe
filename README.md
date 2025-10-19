@@ -163,6 +163,7 @@ Create a `.env` file in the root directory for environment-specific configuratio
 ```env
 # API Configuration (if applicable)
 NUXT_PUBLIC_API_BASE_URL=https://api.example.com
+NUXT_IMAGE_PROVIDER=weserv # ipx for development, weserv for production
 
 # Node.js Server Configuration
 NODE_ENV=production

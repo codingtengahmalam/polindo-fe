@@ -14,7 +14,7 @@
       />
     </NuxtLink>
     <div class="space-y-4" :class="{ 'p-4': withBackground }">
-      <h3 class="text-title font-semibold leading-snug line-clamp-3">
+      <h3 class="text-title font-semibold leading-snug line-clamp-3 h-[4.5rem]">
         <NuxtLink
           :to="`/${article.title_slug}`"
           class="hover:text-brand-600 transition-colors"
@@ -23,24 +23,25 @@
         </NuxtLink>
       </h3>
 
-      <div class="flex items-center text-xs gap-1">
+      <div class="flex items-center text-xs gap-1 min-w-0">
         <Author
           v-if="withAuthor"
           :id="article.author?.id ?? 0"
           :name="article.author?.display_name ?? ''"
           :slug="article.author?.slug ?? ''"
+          class="min-w-0 max-w-[60%]"
         />
-        <span v-if="withAuthor && withDate" class="text-grayscale-40">•</span>
+        <span v-if="withAuthor && withDate" class="text-grayscale-40 shrink-0">•</span>
         <time
           v-if="withDate"
           :datetime="article.created_at"
-          class="text-subtitle font-normal"
+          class="text-subtitle font-normal shrink-0 whitespace-nowrap"
         >
           {{ relativeTime(article.created_at) }}
         </time>
         <CategoryBadge
           v-if="withCategory"
-          class="ml-auto"
+          class="ml-auto shrink-0"
           :name="article.category?.name ?? ''"
           :slug="article.category?.slug ?? ''"
         />
