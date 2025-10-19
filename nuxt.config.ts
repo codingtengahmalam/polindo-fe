@@ -4,7 +4,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: 'https://api.politikindonesia.id',
+      apiBase: "https://api.politikindonesia.id",
     },
   },
 
@@ -37,6 +37,7 @@ export default defineNuxtConfig({
   modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss", "@nuxt/image"],
 
   image: {
+    provider: "weserv",
     quality: 80,
     format: ["webp"],
     screens: {
@@ -48,7 +49,7 @@ export default defineNuxtConfig({
       xxl: 1536,
     },
     dir: "public",
-    domains: [],
+    domains: ["politikindonesia.id"],
   },
 
   fonts: {
