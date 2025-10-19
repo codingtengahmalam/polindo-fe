@@ -71,6 +71,8 @@
 <script lang="ts" setup>
 import type { Article, ArticleListResponse, PaginationLinks } from "~/types";
 
+const { settings } = useSettings();
+
 const route = useRoute();
 const { id, name } = route.query;
 
@@ -121,6 +123,15 @@ function slugToName(slug: string) {
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
+
+useHead({
+  title: `${name ?? slugToName(slug)}`,
+  meta: [
+    { name: "description", content: `${name ?? slugToName(slug)}, ${settings.value?.site_title ?? 'Berita Politik Indonesia'}` },
+    { name: "keywords", content: `${name ?? slugToName(slug)}, ${settings.value?.site_title ?? 'Berita Politik Indonesia'}` },
+    { name: "news_keywords", content: `${name ?? slugToName(slug)}, ${settings.value?.site_title ?? 'Berita Politik Indonesia'}` },
+  ],
+});
 
 onMounted(async () => {
   await fetchArticles();

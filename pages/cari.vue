@@ -165,6 +165,13 @@ async function onSearch() {
   // Refresh data - ini akan fetch dari client-side
   await refresh()
 }
-</script>
 
-<style></style>
+useHead({
+  title: `Pencarian: ${search.value}`,
+  meta: [
+    { name: "description", content: `Search: ${search.value}` },
+    { name: "keywords", content: `Search, ${search.value}` },
+    { name: "news_keywords", content: `Search, ${search.value}` },
+  ],
+});
+</script>

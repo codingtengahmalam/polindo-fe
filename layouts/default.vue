@@ -12,7 +12,9 @@
 <script lang="ts" setup>
 const { settings } = useSettings();
 
-// Default values (fallback jika settings belum loaded)
+// Get dynamic base URL
+const { baseUrl } = useBaseUrl();
+
 const DEFAULTS = {
   siteTitle: "POLITIK INDONESIA, POLINDO",
   homeTitle: "Kantor Berita Politik Indonesia",
@@ -22,7 +24,6 @@ const DEFAULTS = {
     "Berita Akurat, Berita Terupdate, Berita Hari Ini, Berita Politik, Berita Indonesia, Prabowo Subianto, Joko Widodo, politikindonesia.id, polindo.id",
   author: "rmolnetwork",
   twitterSite: "@Politik Indonesia",
-  canonicalUrl: "https://politikindonesia.id/",
   logoUrl: "https://politikindonesia.id/assets/img/logo.png",
 };
 
@@ -90,7 +91,7 @@ useHead({
     },
     {
       rel: "canonical",
-      href: DEFAULTS.canonicalUrl,
+      href: baseUrl,
     },
   ],
 
@@ -118,7 +119,7 @@ useSeoMeta({
   ogDescription: description.value,
   ogType: "website",
   ogSiteName: siteTitle.value,
-  ogUrl: DEFAULTS.canonicalUrl,
+  ogUrl: baseUrl,
   ogImage: DEFAULTS.logoUrl,
   ogImageWidth: "240",
   ogImageHeight: "90",

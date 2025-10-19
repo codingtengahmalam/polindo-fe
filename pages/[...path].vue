@@ -143,6 +143,7 @@ import type {
   Article,
   ArticleDetailResponse,
   ArticleListResponse,
+  ArticleTag,
 } from "~/types";
 
 // Composables
@@ -230,6 +231,34 @@ async function fetchRelatedArticles() {
   } finally {
     isLoading.value = false;
   }
+}
+
+useHead({
+  title: `${data?.value?.title}`,
+  meta: [
+    { name: "description", content: `${data?.value?.summary || ''}` },
+    { name: "keywords", content: tagsToString(data?.value?.tags || []) },
+    { name: "news_keywords", content: tagsToString(data?.value?.tags || []) },
+    { name: "article:author", content: data?.value?.author?.display_name || '' },
+  ],
+});
+
+const { baseUrl } = useBaseUrl();
+
+useSeoMeta({
+  title: `${data?.value?.title}`,
+  ogTitle: `${data?.value?.title}`,
+  description: `${data?.value?.summary || ''}`,
+  ogDescription: `${data?.value?.summary || ''}`,
+  ogImage: data?.value?.images?.big || '',
+  ogImageWidth: '750',
+  ogImageHeight: '422',
+  ogUrl: `${baseUrl}/article/${data?.value?.title_slug}`,
+  author: data?.value?.author?.display_name || '',
+});
+
+function tagsToString(tags: ArticleTag[]) {
+  return tags.map((tag) => tag.tag).join(", ");
 }
 
 onMounted(async () => {

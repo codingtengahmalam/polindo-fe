@@ -494,6 +494,15 @@ const tertiaryArticlePopular = computed(() => {
   return grouped;
 });
 
+useHead({
+  title: `${category.value?.data?.name ?? 'Kategori Berita'}`,
+  meta: [
+    { name: "description", content: category.value?.data?.description ?? "Berita Indonesia dan Dunia Terkini Hari Ini, Berita Akurat, Berita Terpercaya, Berita Politik Indonesia, Berita Terupdate, Berita Ekonomi, Hukum, Politik, Berita Hari Ini" },
+    { name: "keywords", content: category.value?.data?.keywords ?? "Berita Akurat, Berita Terupdate, Berita Hari Ini, Berita Politik, Berita Indonesia, Prabowo Subianto, Joko Widodo, politikindonesia.id, polindo.id" },
+    { name: "news_keywords", content: category.value?.data?.keywords ?? "Berita Akurat, Berita Terupdate, Berita Hari Ini, Berita Politik, Berita Indonesia, Prabowo Subianto, Joko Widodo, politikindonesia.id, polindo.id" },
+  ],
+});
+
 function normalizeTextCapitalize(text: string) {
   return text
     .toLowerCase()

@@ -71,6 +71,8 @@
 <script lang="ts" setup>
 import type { Article, ArticleListResponse, PaginationLinks } from "~/types";
 
+const { settings } = useSettings();
+
 const route = useRoute();
 
 const articles = ref<Article[]>([]);
@@ -121,6 +123,15 @@ function slugToName(slug: string) {
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
+
+useHead({
+  title: `${slugToName(slug)}`,
+  meta: [
+    { name: "description", content: `Tag: ${slugToName(slug)}` },
+    { name: "keywords", content: `Tag: ${slugToName(slug)}` },
+    { name: "news_keywords", content: `Tag, ${slugToName(slug)}` },
+  ],
+});
 
 onMounted(async () => {
   await fetchArticles();
