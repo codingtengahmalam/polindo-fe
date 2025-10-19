@@ -23,6 +23,8 @@ export default defineNuxtConfig({
   modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss", "@nuxt/image"],
 
   image: {
+    // Weserv is perfect for static deployments (Netlify, Vercel, etc.)
+    // IPX only works with SSR Node.js servers
     provider: process.env.NUXT_IMAGE_PROVIDER || "weserv",
     quality: 80,
     format: ["webp"],
@@ -35,10 +37,12 @@ export default defineNuxtConfig({
       xxl: 1536,
     },
     dir: "public",
-    domains: ["politikindonesia.id"],
-    // Weserv configuration (only used in production)
+    // Allow images from these domains
+    domains: ["politikindonesia.id", "api.politikindonesia.id"],
+    // Weserv config - no baseURL needed as API returns full URLs
     weserv: {
-      baseURL: "https://politikindonesia.id",
+      // Leave empty - API provides full URLs like:
+      // https://politikindonesia.id/uploads/images/2025/10/image.jpg
     },
   },
 
