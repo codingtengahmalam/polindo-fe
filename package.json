@@ -8,6 +8,8 @@
     "generate": "nuxt generate",
     "start": "node .output/server/index.mjs",
     "preview": "nuxt preview",
+    "preview:cloudflare": "wrangler dev --cwd .output/server",
+    "deploy": "npm run build && wrangler deploy --cwd .output/server",
     "postinstall": "nuxt prepare",
     "type-check": "nuxt typecheck"
   },
@@ -29,6 +31,7 @@
     "@types/marked": "^5.0.2",
     "@types/node": "^24.8.1",
     "typescript": "^5.9.3",
-    "vue-tsc": "^3.1.1"
+    "vue-tsc": "^3.1.1",
+    "wrangler": "^4.43.0"
   }
 }
