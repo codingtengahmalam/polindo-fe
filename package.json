@@ -8,8 +8,8 @@
     "generate": "nuxt generate",
     "start": "node .output/server/index.mjs",
     "preview": "nuxt preview",
-    "preview:cloudflare": "wrangler dev --cwd .output/server",
-    "deploy": "npm run build && wrangler deploy --cwd .output/server",
+    "preview:cloudflare": "wrangler dev --cwd .output/server --config wrangler.json",
+    "deploy": "npm run build && rm -rf .wrangler/deploy/config.json && wrangler deploy --cwd .output/server --config wrangler.json",
     "postinstall": "nuxt prepare",
     "type-check": "nuxt typecheck"
   },

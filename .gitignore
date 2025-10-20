@@ -6,6 +6,10 @@
 .cache
 dist
 
+# Wrangler/Cloudflare
+.wrangler
+wrangler.toml.bak
+
 # Node dependencies
 node_modules
 
