@@ -20,6 +20,13 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: "2025-07-15",
+  nitro: {
+    preset: "cloudflare_module",
+    cloudflare: {
+      deployConfig: true,
+      nodeCompat: true,
+    },
+  },
   modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss", "@nuxt/image"],
 
   image: {
