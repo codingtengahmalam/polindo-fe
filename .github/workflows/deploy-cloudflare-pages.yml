@@ -34,9 +34,16 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Deploy to Cloudflare Pages with Wrangler (SSR)
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --cwd .output/server
+      - name: Verify build output
+        run: |
+          echo "Checking .output/server directory..."
+          ls -la .output/server/
+          echo "Checking wrangler.json..."
+          cat .output/server/wrangler.json
+
+      - name: Deploy to Cloudflare Workers (SSR)
+        working-directory: .output/server
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
