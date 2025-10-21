@@ -55,44 +55,64 @@
         @scroll="updateScrollState"
         @keydown="handleKeyboardNavigation"
       >
+        <!-- Skeleton Loading -->
+        <div
+          v-if="isLoading"
+          v-for="i in 4"
+          :key="i"
+          class="flex-shrink-0 w-full md:w-[270px] p-3 border border-grayscale-20 rounded-lg min-h-[460px] snap-start"
+        >
+          <div class="w-1/2 h-5 bg-grayscale-10 rounded-lg"></div>
+          <div class="divide-y divide-grayscale-10">
+            <div v-for="j in 5" :key="j" class="flex items-center justify-between gap-2 py-2">
+              <div class="flex flex-col gap-2 w-full">
+                <div class="h-4 bg-grayscale-10 rounded w-full"></div>
+                <div class="h-4 bg-grayscale-10 rounded w-4/5"></div>
+              </div>
+              <div class="size-16 shrink-0 bg-grayscale-10 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
         <article
-          v-for="category in categories"
-          :key="category.slug"
+          v-else
+          v-for="category in categoriesPosts"
+          :key="category.category.id"
           class="flex-shrink-0 w-full md:w-[270px] p-3 border border-grayscale-20 rounded-lg min-h-[460px] snap-start"
         >
           <header class="mb-2">
             <h3 class="text-title text-xl font-bold">
               <NuxtLink
-                :to="`/category/${category.slug}`"
-                class="hover:text-brand-600 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2 rounded-sm"
+                :to="`/category/${category.category.slug}`"
+                class="hover:text-brand-600 transition-colors rounded-sm"
               >
-                {{ category.name }}
+                {{ category.category.name }}
               </NuxtLink>
             </h3>
           </header>
 
           <div class="divide-y divide-grayscale-10">
             <div
-              v-for="article in category.articles"
-              :key="article.slug"
+              v-if="category.posts.length > 0"
+              v-for="article in category.posts"
+              :key="article.title_slug"
               class="flex items-center justify-between gap-2 py-2"
             >
               <div class="flex-1 min-w-0">
                 <NuxtLink
-                  :to="`/${article.slug}`"
-                  class="text-title text-sm font-semibold leading-snug line-clamp-3 hover:text-brand-600 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2 rounded-sm"
+                  :to="`/${article.title_slug}`"
+                  class="text-title text-sm font-semibold leading-snug line-clamp-3 hover:text-brand-600 transition-colors rounded-sm"
                 >
                   {{ article.title }}
                 </NuxtLink>
               </div>
 
               <NuxtLink
-                :to="`/${article.slug}`"
+                :to="`/${article.title_slug}`"
                 :aria-label="`Baca artikel: ${article.title}`"
-                class="shrink-0 overflow-hidden rounded-lg bg-grayscale-5 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2"
+                class="shrink-0 overflow-hidden rounded-lg bg-grayscale-5"
               >
                 <NuxtImg
-                  :src="article.image"
+                  :src="article.images?.default"
                   :alt="`Gambar artikel: ${article.title}`"
                   width="64"
                   height="64"
@@ -102,6 +122,9 @@
                 />
               </NuxtLink>
             </div>
+            <div v-else class="flex items-center justify-center py-2">
+              <p class="text-sm text-grayscale-40">Belum ada artikel di kategori ini.</p>
+            </div>
           </div>
         </article>
       </div>
@@ -110,6 +133,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { PostCategory, PostCategoryResponse } from "~/types";
+
 // Use horizontal scroll composable
 const {
   scrollContainer,
@@ -119,6 +144,9 @@ const {
   scrollRight,
   updateScrollState,
 } = useHorizontalScroll();
+
+const categoriesPosts = ref<PostCategory[]>();
+const isLoading = ref(true);
 
 // Keyboard navigation for accessibility
 const handleKeyboardNavigation = (event: KeyboardEvent) => {
@@ -131,226 +159,34 @@ const handleKeyboardNavigation = (event: KeyboardEvent) => {
   }
 };
 
-// Dummy data - replace with real data later
-const categories = ref([
-  {
-    name: "Politik",
-    slug: "politik",
-    articles: [
-      {
-        title: "Polemik RUU Pemilu: Fraksi Sepakat Lanjutkan Pembahasan",
-        slug: "polemik-ruu-pemilu-fraksi-sepakat-lanjutkan-pembahasan",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Presiden Tunjuk Pj Gubernur Baru untuk 5 Provinsi",
-        slug: "presiden-tunjuk-pj-gubernur-baru-untuk-5-provinsi",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title:
-          "KPK Panggil Saksi Terkait Kasus Dugaan Suap Proyek Infrastruktur",
-        slug: "kpk-panggil-saksi-terkait-kasus-dugaan-suap-proyek-infrastruktur",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Koalisi Parlemen Bahas Arah Kebijakan Luar Negeri 2026",
-        slug: "koalisi-parlemen-bahas-arah-kebijakan-luar-negeri-2026",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Koalisi Parlemen Bahas Arah Kebijakan Luar Negeri 2026",
-        slug: "koalisi-parlemen-bahas-arah-kebijakan-luar-negeri-2026",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-    ],
-  },
-  {
-    name: "Ekonomi",
-    slug: "ekonomi",
-    articles: [
-      {
-        title: "Rupiah Menguat, IHSG Dibuka Menghijau di Awal Pekan",
-        slug: "rupiah-menguat-ihsg-dibuka-menghijau-di-awal-pekan",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Harga Pangan Naik, Pemerintah Siapkan Operasi Pasar",
-        slug: "harga-pangan-naik-pemerintah-siapkan-operasi-pasar",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Investasi Asing Meningkat di Sektor Manufaktur dan Energi",
-        slug: "investasi-asing-meningkat-di-sektor-manufaktur-dan-energi",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "UMKM Dorong Ekspor Melalui Platform Digital",
-        slug: "umkm-dorong-ekspor-melalui-platform-digital",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-    ],
-  },
-  {
-    name: "Teknologi",
-    slug: "teknologi",
-    articles: [
-      {
-        title: "Startup Lokal Rilis AI Asisten untuk UMKM",
-        slug: "startup-lokal-rilis-ai-asisten-untuk-umkm",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Pemerintah Kaji Regulasi Keamanan Data Pribadi",
-        slug: "pemerintah-kaji-regulasi-keamanan-data-pribadi",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Operator Seluler Uji 5G Advanced di 3 Kota Besar",
-        slug: "operator-seluler-uji-5g-advanced-di-3-kota-besar",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Ekosistem Startup Deep Tech Mulai Bergeliat",
-        slug: "ekosistem-startup-deep-tech-mulai-bergeliat",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-    ],
-  },
-  {
-    name: "Olahraga",
-    slug: "olahraga",
-    articles: [
-      {
-        title: "Timnas U-23 Menang Tipis di Laga Persahabatan",
-        slug: "timnas-u23-menang-tipis-di-laga-persahabatan",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Jelang Liga, Klub Lakukan Pemusatan Latihan di Luar Negeri",
-        slug: "jelang-liga-klub-lakukan-pemusatan-latihan-di-luar-negeri",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Pebulu Tangkis Raih Gelar Super Series",
-        slug: "pebulu-tangkis-raih-gelar-super-series",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Atletik Nasional Siapkan Roadmap Menuju Olimpiade",
-        slug: "atletik-nasional-siapkan-roadmap-menuju-olimpiade",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-    ],
-  },
-  {
-    name: "Kesehatan",
-    slug: "kesehatan",
-    articles: [
-      {
-        title: "Kasus ISPA Meningkat, Dokter Imbau Penggunaan Masker",
-        slug: "kasus-ispa-meningkat-dokter-imbau-penggunaan-masker",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Vaksin Baru Untuk Lansia Masuk Tahap Uji Klinis",
-        slug: "vaksin-baru-untuk-lansia-masuk-tahap-uji-klinis",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Tren Olahraga Ringan di Kantor Meningkat",
-        slug: "tren-olahraga-ringan-di-kantor-meningkat",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Studi: Pola Tidur Sehat Kurangi Risiko Penyakit Kronis",
-        slug: "studi-pola-tidur-sehat-kurangi-risiko-penyakit-kronis",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-    ],
-  },
-  {
-    name: "Pendidikan",
-    slug: "pendidikan",
-    articles: [
-      {
-        title: "Kurikulum Baru Dorong Literasi Digital Sejak Dini",
-        slug: "kurikulum-baru-dorong-literasi-digital-sejak-dini",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Beasiswa Pemerintah Dibuka untuk 10 Ribu Mahasiswa",
-        slug: "beasiswa-pemerintah-dibuka-untuk-10-ribu-mahasiswa",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Sekolah Hybrid Diperluas ke 50 Kabupaten/Kota",
-        slug: "sekolah-hybrid-diperluas-ke-50-kabupaten-kota",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Guru Penggerak Dapat Pelatihan Kepemimpinan",
-        slug: "guru-penggerak-dapat-pelatihan-kepemimpinan",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-    ],
-  },
-  {
-    name: "Hiburan",
-    slug: "hiburan",
-    articles: [
-      {
-        title: "Film Lokal Tembus Festival Internasional",
-        slug: "film-lokal-tembus-festival-internasional",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Konser Musisi Dunia Siap Hibur Jakarta Akhir Pekan",
-        slug: "konser-musisi-dunia-siap-hibur-jakarta-akhir-pekan",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Serial Baru Raih Rating Tertinggi Bulan Ini",
-        slug: "serial-baru-raih-rating-tertinggi-bulan-ini",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-      {
-        title: "Kolaborasi Seniman Muda Pamerkan Karya di Galeri Kota",
-        slug: "kolaborasi-seniman-muda-pamerkan-karya-di-galeri-kota",
-        image:
-          "https://politikindonesia.id/uploads/images/2025/10/image_750x_68ee1be35635b.jpg",
-      },
-    ],
-  },
-]);
+async function getCategoriesPosts() {
+  try {
+    isLoading.value = true;
+    const response = await $fetch<PostCategoryResponse>(
+      `${useRuntimeConfig().public.apiBase}/api/v1/posts/category`
+    );
+    categoriesPosts.value = response.data;
+  } catch (error) {
+    console.error("Failed to fetch categories posts:", error);
+  } finally {
+    isLoading.value = false;
+    // Update scroll state after data is loaded and DOM is updated
+    await nextTick();
+    updateScrollState();
+  }
+}
+
+// Watch for changes in categories data and update scroll state
+watch(categoriesPosts, async () => {
+  if (categoriesPosts.value && !isLoading.value) {
+    await nextTick();
+    updateScrollState();
+  }
+}, { immediate: false });
+
+onMounted(async () => {
+  await getCategoriesPosts();
+});
 </script>
 
 <style scoped>
