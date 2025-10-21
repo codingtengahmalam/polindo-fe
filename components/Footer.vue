@@ -18,8 +18,7 @@
               <div class="flex gap-3 items-start">
                 <IconTower class="h-5 shrink-0 mt-0.5" />
                 <span class="text-sm leading-relaxed">
-                  Villa Melati Mas Blok M6 No 5, Jelupang, Serpong Utara,
-                  Tangerang Selatan
+                  {{ settings?.contact_address ?? "Villa Melati Mas Blok M6 No 5, Jelupang, Serpong Utara, Tangerang Selatan" }}
                 </span>
               </div>
               <div class="flex gap-3 items-center">
@@ -28,7 +27,7 @@
                   href="mailto:politikindonesiaonline@gmail.com"
                   class="text-sm hover:text-white transition-colors"
                 >
-                  politikindonesiaonline@gmail.com
+                  {{ settings?.contact_email ?? "politikindonesiaonline@gmail.com" }}
                 </a>
               </div>
             </address>
@@ -40,12 +39,12 @@
               Pedoman Kami
             </h2>
             <ul class="space-y-2">
-              <li v-for="guideline in GUIDELINES" :key="guideline.name">
+              <li v-for="page in pages" :key="page.id">
                 <NuxtLink
-                  :to="guideline.url"
+                  :to="page.slug"
                   class="text-sm hover:text-[#E5E8E8] transition-colors inline-block"
                 >
-                  {{ guideline.name }}
+                  {{ page.title }}
                 </NuxtLink>
               </li>
             </ul>
@@ -130,6 +129,11 @@ import YoutubeIcon from "~/assets/social-media/mdi_youtube.png";
 import RSSIcon from "~/assets/social-media/ri_rss-fill.png";
 import AppStoreIcon from "~/assets/appstore.png";
 import GooglePlayIcon from "~/assets/playstore.png";
+import type { Page, PagesListResponse } from "~/types";
+
+const { settings } = useSettings();
+const pages = ref<Page[]>([]);
+const pagesState = useState<PagesListResponse | null>("pages-state", () => null);
 
 // Types
 interface SocialMediaLink {
@@ -181,51 +185,35 @@ const SOCIAL_MEDIA: readonly SocialMediaLink[] = [
   },
 ] as const;
 
-const GUIDELINES: readonly GuidelineLink[] = [
-  {
-    name: "Tentang Kami",
-    url: "/",
-  },
-  {
-    name: "Privacy Policy",
-    url: "/",
-  },
-  {
-    name: "Disclaimer",
-    url: "/",
-  },
-  {
-    name: "Jenjang Karier",
-    url: "/",
-  },
-  {
-    name: "Pedoman Pemberitaan Media Siber",
-    url: "/",
-  },
-  {
-    name: "Pedoman Pemberitaan Ramah Anak",
-    url: "/",
-  },
-  {
-    name: "Kode Etik Jurnalistik",
-    url: "/",
-  },
-  {
-    name: "Iklan",
-    url: "/",
-  },
-] as const;
-
 const APPS: readonly AppLink[] = [
   {
     name: "Google Play",
     icon: GooglePlayIcon,
-    url: "https://play.google.com/store/apps/details?id=id.polindo.android",
+    url: settings.value?.android_download_link ?? "https://play.google.com/store/apps/details?id=id.polindo.android",
   },
   {
     name: "App Store",
     icon: AppStoreIcon,
-    url: "https://play.google.com/store/apps/details?id=id.polindo.android",
+    url: settings.value?.android_download_link ?? "https://play.google.com/store/apps/details?id=id.polindo.android", // response not provide ios link
   },
 ] as const;
+
+async function getPages() {
+  try {
+
+    if (!pagesState.value) {
+      pagesState.value = await $fetch<PagesListResponse>(
+        `${useRuntimeConfig().public.apiBase}/api/v1/pages`
+      );
+    }
+
+    pages.value = pagesState.value?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch pages:", error);
+  }
+}
+
+onMounted(async () => {
+  await getPages();
+});
 </script>
