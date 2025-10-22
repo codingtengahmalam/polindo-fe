@@ -18,9 +18,13 @@
         class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-2"
       >
         <!-- Main skeleton -->
-        <div class="w-full lg:pr-4 lg:border-r lg:border-grayscale-10 animate-pulse">
+        <div
+          class="w-full lg:pr-4 lg:border-r lg:border-grayscale-10 animate-pulse"
+        >
           <div class="flex flex-col md:flex-row gap-3 md:gap-4">
-            <div class="w-full md:w-[280px] lg:w-[362px] h-[242px] bg-grayscale-10 rounded-lg shrink-0"></div>
+            <div
+              class="w-full md:w-[280px] lg:w-[362px] h-[242px] bg-grayscale-10 rounded-lg shrink-0"
+            ></div>
             <div class="flex flex-col gap-3 md:gap-4 flex-1">
               <div class="space-y-2">
                 <div class="h-4 bg-grayscale-10 rounded w-24"></div>
@@ -40,7 +44,9 @@
         <!-- Side skeleton -->
         <div class="w-full lg:w-[266px] shrink-0 animate-pulse">
           <div class="flex flex-row sm:flex-col gap-3 sm:gap-2">
-            <div class="w-full lg:h-[150px] h-[100px] bg-grayscale-10 rounded-lg shrink-0"></div>
+            <div
+              class="w-full lg:h-[150px] h-[100px] bg-grayscale-10 rounded-lg shrink-0"
+            ></div>
             <div class="flex-1 space-y-2">
               <div class="h-5 bg-grayscale-10 rounded w-full"></div>
               <div class="h-5 bg-grayscale-10 rounded w-4/5"></div>
@@ -190,9 +196,11 @@
             :key="article.id"
           >
             <h4
-              class="text-title text-lg font-semibold line-clamp-2 hover:text-brand-600 transition-colors leading-5"
+              class="text-title text-lg font-semibold line-clamp-2 hover:text-brand-600 transition-colors leading-5 cursor-pointer"
             >
-              {{ article.title }}
+              <NuxtLink :to="`/${article.title_slug}`">
+                {{ article.title }}
+              </NuxtLink>
             </h4>
             <time class="text-xs text-grayscale-40 font-normal">
               {{ relativeTime(article.created_at || "") }}
@@ -334,14 +342,21 @@
               v-for="i in 5"
               :key="`skeleton-tag-${i}`"
               class="h-8 bg-grayscale-10 rounded-sm animate-pulse"
-              :class="i === 1 ? 'w-24' : i === 2 ? 'w-32' : i === 3 ? 'w-28' : i === 4 ? 'w-36' : 'w-20'"
+              :class="
+                i === 1
+                  ? 'w-24'
+                  : i === 2
+                  ? 'w-32'
+                  : i === 3
+                  ? 'w-28'
+                  : i === 4
+                  ? 'w-36'
+                  : 'w-20'
+              "
             ></div>
           </div>
 
-          <div
-            v-else
-            class="flex flex-wrap md:flex-col items-start gap-2 mt-4"
-          >
+          <div v-else class="flex flex-wrap md:flex-col items-start gap-2 mt-4">
             <NuxtLink
               v-for="tag in tags"
               :key="tag.id"
@@ -385,7 +400,7 @@ const { data: category, status } = await useFetch<CategoryDetailResponse>(
   `${useRuntimeConfig().public.apiBase}/api/v1/categories/${slug}`,
   {
     headers: {
-      'User-Agent': 'PolitikIndonesia/1.0',
+      "User-Agent": "PolitikIndonesia/1.0",
     },
     server: true,
   }
@@ -464,7 +479,9 @@ async function fetchOtherArticles(initial = false) {
 async function fetchTags() {
   try {
     const response = await $fetch<TagListResponse>(
-      `${useRuntimeConfig().public.apiBase}/api/v1/tags/${category?.value?.data?.id}`,
+      `${useRuntimeConfig().public.apiBase}/api/v1/tags/${
+        category?.value?.data?.id
+      }`
     );
 
     tags.value = response?.data || [];
@@ -501,11 +518,26 @@ const tertiaryArticlePopular = computed(() => {
 });
 
 useHead({
-  title: `${category.value?.data?.name ?? 'Kategori Berita'}`,
+  title: `${category.value?.data?.name ?? "Kategori Berita"}`,
   meta: [
-    { name: "description", content: category.value?.data?.description ?? "Berita Indonesia dan Dunia Terkini Hari Ini, Berita Akurat, Berita Terpercaya, Berita Politik Indonesia, Berita Terupdate, Berita Ekonomi, Hukum, Politik, Berita Hari Ini" },
-    { name: "keywords", content: category.value?.data?.keywords ?? "Berita Akurat, Berita Terupdate, Berita Hari Ini, Berita Politik, Berita Indonesia, Prabowo Subianto, Joko Widodo, politikindonesia.id, polindo.id" },
-    { name: "news_keywords", content: category.value?.data?.keywords ?? "Berita Akurat, Berita Terupdate, Berita Hari Ini, Berita Politik, Berita Indonesia, Prabowo Subianto, Joko Widodo, politikindonesia.id, polindo.id" },
+    {
+      name: "description",
+      content:
+        category.value?.data?.description ??
+        "Berita Indonesia dan Dunia Terkini Hari Ini, Berita Akurat, Berita Terpercaya, Berita Politik Indonesia, Berita Terupdate, Berita Ekonomi, Hukum, Politik, Berita Hari Ini",
+    },
+    {
+      name: "keywords",
+      content:
+        category.value?.data?.keywords ??
+        "Berita Akurat, Berita Terupdate, Berita Hari Ini, Berita Politik, Berita Indonesia, Prabowo Subianto, Joko Widodo, politikindonesia.id, polindo.id",
+    },
+    {
+      name: "news_keywords",
+      content:
+        category.value?.data?.keywords ??
+        "Berita Akurat, Berita Terupdate, Berita Hari Ini, Berita Politik, Berita Indonesia, Prabowo Subianto, Joko Widodo, politikindonesia.id, polindo.id",
+    },
   ],
 });
 
