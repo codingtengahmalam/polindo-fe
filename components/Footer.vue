@@ -41,7 +41,7 @@
             <ul class="space-y-2">
               <li v-for="page in pages" :key="page.id">
                 <NuxtLink
-                  :to="page.slug"
+                  :to="`/p/${page.slug}`"
                   class="text-sm hover:text-[#E5E8E8] transition-colors inline-block"
                 >
                   {{ page.title }}

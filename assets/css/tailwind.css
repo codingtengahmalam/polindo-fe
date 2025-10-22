@@ -124,6 +124,33 @@
     @apply rounded-lg my-4 w-full h-auto;
   }
 
+  /* Gambar dengan atribut width/height - reset styling default */
+  .prose img[width][height] {
+    @apply w-auto h-auto max-w-none max-h-none;
+  }
+
+  /* Gambar dengan hanya atribut width */
+  .prose img[width]:not([height]) {
+    @apply w-auto h-auto max-w-none;
+  }
+
+  /* Gambar dengan hanya atribut height */
+  .prose img[height]:not([width]) {
+    @apply w-auto h-auto max-h-none;
+  }
+
+  /* Gambar dalam link (inline icons) - tetap inline dengan teks */
+  .prose a img[width][height] {
+    @apply inline-block align-middle mr-1;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Link yang berisi gambar dan teks */
+  .prose a:has(img) {
+    @apply inline-flex items-center gap-1;
+  }
+
   .prose figure {
     @apply my-6;
   }

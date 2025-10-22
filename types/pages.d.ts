@@ -66,31 +66,36 @@ export interface PagesListResponse extends BaseApiResponse {
   meta: PaginationMeta;
 }
 
+export interface PageDetail {
+  id: number;
+  lang_id: number;
+  title: string;
+  slug: string;
+  description: string;
+  keywords: string;
+  is_custom: boolean;
+  page_default_name: any;
+  page_content: string;
+  page_order: number;
+  visibility: boolean;
+  title_active: boolean;
+  breadcrumb_active: boolean;
+  right_column_active: boolean;
+  need_auth: boolean;
+  location: string;
+  link: any;
+  parent_id: number;
+  page_type: string;
+  parent: any;
+  children: any[];
+  created_at: string;
+  updated_at: any;
+}
+
+
 /**
  * Single page response
  */
 export interface PageDetailResponse extends BaseApiResponse {
-  data: Page;
-}
-
-/**
- * Create page request
- */
-export interface CreatePageRequest {
-  title: string;
-  slug: string;
-  page_type: "page" | "link";
-  visibility: boolean;
-  content?: string;
-}
-
-/**
- * Update page request
- */
-export interface UpdatePageRequest {
-  title?: string;
-  slug?: string;
-  page_type?: "page" | "link";
-  visibility?: boolean;
-  content?: string;
+  data: PageDetail;
 }
