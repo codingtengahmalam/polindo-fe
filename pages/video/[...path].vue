@@ -112,6 +112,10 @@ const { data: video, error: fetchError } =
   await useFetch<VideoPostDetailResponse>(
     `${useRuntimeConfig().public.apiBase}/api/v1/video-posts/${fullPath}`,
     {
+      headers: {
+        'User-Agent': 'PolitikIndonesia/1.0',
+      },
+      server: true,
       // Add proper error handling
       onResponseError({ response }) {
         console.error(

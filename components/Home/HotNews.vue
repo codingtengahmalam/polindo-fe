@@ -80,7 +80,13 @@ import type { ArticleListResponse } from '~/types';
 
 
 const { data: articles, error } = await useFetch<ArticleListResponse>(
-  `${useRuntimeConfig().public.apiBase}/api/v1/posts/popular?limit=5`
+  `${useRuntimeConfig().public.apiBase}/api/v1/posts/popular?limit=5`,
+  {
+    headers: {
+      'User-Agent': 'PolitikIndonesia/1.0',
+    },
+    server: true,
+  }
 );
 
 // Handle error gracefully

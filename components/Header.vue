@@ -125,7 +125,13 @@ const BACKDROP_Z_INDEX = "z-30";
 const route = useRoute();
 
 const { data: categories, error } = await useFetch<CategoryListResponse>(
-  `${useRuntimeConfig().public.apiBase}/api/v1/categories?show_on_menu=true`
+  `${useRuntimeConfig().public.apiBase}/api/v1/categories?show_on_menu=true`,
+  {
+    headers: {
+      'User-Agent': 'PolitikIndonesia/1.0',
+    },
+    server: true,
+  }
 );
 
 // Handle error gracefully

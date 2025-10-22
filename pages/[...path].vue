@@ -171,6 +171,10 @@ const { data: articleResponse, error: fetchError } =
   await useFetch<ArticleDetailResponse>(
     `${useRuntimeConfig().public.apiBase}/api/v1/posts/${fullPath}`,
     {
+      headers: {
+        'User-Agent': 'PolitikIndonesia/1.0',
+      },
+      server: true,
       // Add proper error handling
       onResponseError({ response }) {
         console.error(
