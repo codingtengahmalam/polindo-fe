@@ -22,6 +22,7 @@ export interface VideoPost {
   id: number;
   title: string;
   video_slug: string;
+  content: string | null;
   subtitle: string;
   keywords: string;
   summary: string;

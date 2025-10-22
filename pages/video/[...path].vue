@@ -72,8 +72,8 @@
           <!-- Article Body -->
           <section
             itemprop="articleBody"
-            class="prose prose-sm md:prose-base max-w-none text-subtitle"
-            v-html="data?.video_description || ''"
+            class="prose prose-sm md:prose-base max-w-none text-subtitle pb-10"
+            v-html="renderedContent"
           />
         </article>
       </section>
@@ -89,6 +89,7 @@
 
 <script lang="ts" setup>
 import type { VideoPostDetailResponse } from "~/types";
+const { renderContent } = useMarkdown();
 
 // Composables
 const route = useRoute();
@@ -147,6 +148,9 @@ if (!video.value?.data) {
 
 // Computed Properties
 const data = computed(() => video.value?.data);
+const renderedContent = computed(() =>
+  renderContent(data.value?.content || "")
+);
 
 useHead({
   title: `${data?.value?.title}`,
