@@ -151,6 +151,35 @@
     @apply inline-flex items-center gap-1;
   }
 
+  /* Styling khusus untuk gambar inline di awal paragraf artikel */
+  .prose p:first-child img {
+    @apply inline align-middle mr-2 mb-0 mt-0;
+    max-height: 1.2em; /* Tinggi maksimal sesuai dengan tinggi teks */
+    width: auto;
+    vertical-align: middle;
+    border-radius: 0 !important; /* Override rounded-lg dari .prose img */
+    display: inline !important; /* Force inline display */
+  }
+
+  /* Styling untuk paragraf yang berisi gambar di awal */
+  .prose p:has(img:first-child) img {
+    @apply inline align-middle mr-2 mb-0 mt-0;
+    max-height: 1.2em;
+    width: auto;
+    vertical-align: middle;
+    border-radius: 0 !important; /* Override rounded-lg dari .prose img */
+    display: inline !important; /* Force inline display */
+  }
+
+  /* Responsif untuk mobile - gambar inline lebih kecil */
+  @media (max-width: 768px) {
+    .prose p:first-child img,
+    .prose p:has(img:first-child) img {
+      max-height: 1em;
+      margin-right: 0.5rem;
+    }
+  }
+
   .prose figure {
     @apply my-6;
   }

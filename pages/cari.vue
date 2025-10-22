@@ -117,7 +117,13 @@ const perPage = ref<number>(initialPerPage)
 
 // Fetch popular articles (server-side)
 const { data: articlesPopular, error: popularError } = await useFetch<ArticleListResponse>(
-  `${config.public.apiBase}/api/v1/posts/popular?limit=3`
+  `${config.public.apiBase}/api/v1/posts/popular?limit=3`,
+  {
+    headers: {
+      'User-Agent': 'PolitikIndonesia/1.0',
+    },
+    server: true,
+  }
 );
 
 // Handle error gracefully
@@ -132,6 +138,10 @@ if (popularError.value) {
 const { data: articlesResponse, pending: isLoading, refresh } = await useFetch<ArticleListResponse>(
   `${config.public.apiBase}/api/v1/posts`,
   {
+    headers: {
+      'User-Agent': 'PolitikIndonesia/1.0',
+    },
+    server: true,
     query: {
       search: search,
       page: page,

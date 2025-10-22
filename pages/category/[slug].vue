@@ -382,7 +382,13 @@ const initialLoading = ref(true);
 const links = ref<PaginationLinks>();
 
 const { data: category, status } = await useFetch<CategoryDetailResponse>(
-  `${useRuntimeConfig().public.apiBase}/api/v1/categories/${slug}`
+  `${useRuntimeConfig().public.apiBase}/api/v1/categories/${slug}`,
+  {
+    headers: {
+      'User-Agent': 'PolitikIndonesia/1.0',
+    },
+    server: true,
+  }
 );
 
 async function fetchArticlePopular() {
