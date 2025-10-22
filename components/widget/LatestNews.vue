@@ -56,7 +56,7 @@
       </article>
       <div v-if="hasMoreNews" class="pt-1">
         <NuxtLink
-          to=""
+          :to="`/article/${props.type === 'latest' ? 'terbaru' : 'populer'}`"
           class="text-brand-800 uppercase text-sm font-normal flex items-center gap-2 hover:text-brand-700 transition-colors"
           aria-label="Lihat semua berita terbaru lainnya"
         >
