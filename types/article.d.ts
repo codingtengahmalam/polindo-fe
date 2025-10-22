@@ -88,3 +88,18 @@ export interface ArticleDetailResponse {
   message: string;
   status: boolean;
 }
+
+/**
+ * Post Category Response
+ */
+export interface PostCategory {
+  category: ArticleCategory;
+  posts: Article[];
+}
+
+/**
+ * Post Category Response
+ */
+export interface PostCategoryResponse {
+  data: PostCategory[];
+}

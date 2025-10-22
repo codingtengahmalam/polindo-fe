@@ -9,6 +9,7 @@ export * from "./article";
 export * from "./video";
 export * from "./tag";
 export * from "./setting";
+export * from "./pages";
 
 declare global {
   type CustomObject<T = any> = {

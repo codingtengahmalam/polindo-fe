@@ -24,7 +24,6 @@ export default defineNuxtConfig({
     preset: "cloudflare_module",
     cloudflare: {
       deployConfig: true,
-      nodeCompat: true,
     },
   },
   modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss", "@nuxt/image"],

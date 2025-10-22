@@ -63,26 +63,56 @@
             class="grid gap-4 transition-opacity duration-300"
             :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
           >
-            <!-- the controls always show in IOS -->
-            <!-- #t=0.001 for fix thumbnail video not render in IOS -->
-            <video
+            <!-- Video Container with Overlay -->
+            <div
               v-for="(video, index) in videos?.data"
               :key="video.id"
-              :ref="(el) => setVideoRef(el, video.id, index)"
-              :controls="isIOS || activeVideoId === video.id"
-              :src="`${video.video_path}#t=0.001`"
-              preload="metadata"
-              controlsList="nodownload"
-              disablePictureInPicture
-              playsinline
-              class="w-full aspect-[9/16] object-cover rounded-lg"
-              @play="handlePlay(video.id)"
-              @mouseenter="handleMouseEnter(video.id)"
-              @mouseleave="handleMouseLeave(video.id)"
-              @touchstart="handleTouchStart(video.id)"
+              class="relative group"
             >
-              Your browser doesn't support video formats.
-            </video>
+              <!-- Video Element -->
+              <video
+                :ref="(el) => setVideoRef(el, video.id, index)"
+                :controls="isIOS || activeVideoId === video.id"
+                :src="`${video.video_path}#t=0.001`"
+                :data-video-id="video.id"
+                preload="metadata"
+                controlsList="nodownload"
+                disablePictureInPicture
+                playsinline
+                class="w-full aspect-[9/16] object-cover rounded-lg"
+                @play="handlePlay(video.id)"
+                @mouseenter="handleMouseEnter(video.id)"
+                @mouseleave="handleMouseLeave(video.id)"
+                @touchstart="handleTouchStart(video.id)"
+              >
+                Your browser doesn't support video formats.
+              </video>
+
+              <!-- Overlay with Title - always visible on mobile -->
+              <div
+                class="absolute inset-0 rounded-lg"
+                @click="toggleVideoPlayback(video.id)"
+              >
+                <!-- Bottom overlay for title (always visible on mobile, hover on desktop) -->
+                <div
+                  class="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300 ease-in-out pointer-events-none"
+                  :class="isMobile ? 'translate-y-0' : 'translate-y-full group-hover:translate-y-0'"
+                >
+                  <div class="bg-gradient-to-t from-black/80 to-transparent rounded-b-lg p-4 -m-4 pointer-events-auto">
+                    <NuxtLink
+                      :to="`/video/${video.video_slug}`"
+                      class="block text-white hover:text-brand-300 transition-colors duration-200 pointer-events-auto"
+                      :aria-label="`Baca artikel: ${video.title}`"
+                      @click.stop
+                    >
+                      <h3 class="text-sm font-semibold line-clamp-2 leading-tight">
+                        {{ video.title }}
+                      </h3>
+                    </NuxtLink>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <template #fallback>
@@ -116,6 +146,9 @@ const videos = ref<VideoPostListResponse>()
 const currentPage = ref<number>(1)
 const isLoading = ref(false)
 
+// Video play state tracking
+const playingVideoIds = ref<Set<number>>(new Set())
+
 // Computed perPage based on screen size (mobile: 1, desktop: 4)
 const perPage = computed(() => videosPerPage.value)
 
@@ -132,7 +165,67 @@ const {
   handleTouchStart,
   pauseAllVideos,
   clearAllVideoRefs,
+  videoRefs,
 } = useVideoCarousel([], videosPerPage)
+
+// Function to check if video is currently playing
+const isVideoPlaying = (videoId: number): boolean => {
+  // Use reactive state as primary source
+  const isPlaying = playingVideoIds.value.has(videoId)
+
+  // Fallback to video element check
+  const videoElement = videoRefs.value.get(videoId)
+  const elementIsPlaying = videoElement ? !videoElement.paused : false
+
+  console.log('isVideoPlaying debug:', {
+    videoId,
+    reactiveState: isPlaying,
+    elementState: elementIsPlaying,
+    hasVideoElement: !!videoElement,
+    paused: videoElement?.paused,
+    playingVideoIds: Array.from(playingVideoIds.value)
+  })
+
+  return isPlaying || elementIsPlaying
+}
+
+// Function to toggle video play/pause when button is clicked
+const toggleVideoPlayback = (videoId: number) => {
+  const videoElement = videoRefs.value.get(videoId)
+  const isCurrentlyPlaying = playingVideoIds.value.has(videoId)
+
+  console.log('toggleVideoPlayback debug:', {
+    videoId,
+    hasVideoElement: !!videoElement,
+    paused: videoElement?.paused,
+    isCurrentlyPlaying,
+    videoRefsSize: videoRefs.value.size,
+    allVideoIds: Array.from(videoRefs.value.keys())
+  })
+
+  if (videoElement) {
+    if (isCurrentlyPlaying || !videoElement.paused) {
+      console.log('Pausing video:', videoId)
+      // Pause the current video
+      videoElement.pause()
+      playingVideoIds.value.delete(videoId)
+    } else {
+      console.log('Playing video:', videoId)
+      // Pause all other videos first
+      handlePlay(videoId)
+      // Clear all playing states
+      playingVideoIds.value.clear()
+      // Then play the selected video
+      videoElement.play().then(() => {
+        playingVideoIds.value.add(videoId)
+      }).catch((error) => {
+        console.warn('Error playing video:', error)
+      })
+    }
+  } else {
+    console.warn('Video element not found for ID:', videoId)
+  }
+}
 
 async function getVideos() {
   try {

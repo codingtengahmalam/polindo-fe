@@ -51,6 +51,7 @@ export interface VideoPostListResponse {
  */
 export interface VideoPostDetailResponse {
   data: VideoPost;
+  message: string;
 }
 
 /**

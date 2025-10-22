@@ -49,10 +49,22 @@ export const useHorizontalScroll = () => {
   };
 
   /**
-   * Initialize scroll state on mount
+   * Initialize scroll state on mount and handle resize events
    */
   onMounted(() => {
     updateScrollState();
+
+    // Handle window resize events that might affect scroll state
+    const handleResize = () => {
+      updateScrollState();
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup on unmount
+    onUnmounted(() => {
+      window.removeEventListener("resize", handleResize);
+    });
   });
 
   return {
