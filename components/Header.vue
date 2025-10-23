@@ -11,11 +11,7 @@
         <!-- Left Side: Logo & Menu -->
         <div class="flex items-center gap-4 xl:gap-6">
           <!-- Logo -->
-          <NuxtLink
-            to="/"
-            aria-label="Politik Indonesia Home"
-            class="shrink-0"
-          >
+          <NuxtLink to="/" aria-label="Politik Indonesia Home" class="shrink-0">
             <img
               src="/logo.png"
               alt="Politik Indonesia - Jaringan Informasi Politik"
@@ -34,9 +30,13 @@
                   'block px-2.5 py-2.5 transition-colors leading-1.3',
                   isActiveRoute(`/category/${category.name_slug}`)
                     ? 'text-brand-600'
-                    : 'text-white hover:text-brand-600'
+                    : 'text-white hover:text-brand-600',
                 ]"
-                :aria-current="isActiveRoute(`/category/${category.name_slug}`) ? 'page' : undefined"
+                :aria-current="
+                  isActiveRoute(`/category/${category.name_slug}`)
+                    ? 'page'
+                    : undefined
+                "
               >
                 {{ category.name }}
               </NuxtLink>
@@ -46,14 +46,19 @@
 
         <!-- Right Side: Search & Hamburger -->
         <div class="flex items-center gap-4">
-          <!-- Search Button -->
-          <NuxtLink
+
+          <div class="flex items-center gap-2">
+            <NuxtLink
             to="/cari"
             class="transition-colors text-white hover:text-brand-600"
             aria-label="Search"
           >
             <IconSearch />
           </NuxtLink>
+          <a href="#" target="_blank">
+            <IconUserCircle class="transition-colors text-white hover:text-brand-600 size-6" />
+          </a>
+          </div>
 
           <!-- Hamburger Button (Mobile & Tablet <1024px) -->
           <button
@@ -74,7 +79,10 @@
     <Transition name="slide">
       <div
         v-if="isMenuOpen"
-        :class="['lg:hidden fixed inset-0 bg-grayscale-90', MOBILE_MENU_Z_INDEX]"
+        :class="[
+          'lg:hidden fixed inset-0 bg-grayscale-90',
+          MOBILE_MENU_Z_INDEX,
+        ]"
         :style="{ top: HEADER_HEIGHT }"
       >
         <nav class="container py-6" aria-label="Mobile navigation">
@@ -86,9 +94,13 @@
                   'block px-4 py-3 text-base font-semibold transition-colors leading-1.3',
                   isActiveRoute(`/category/${category.name_slug}`)
                     ? 'text-brand-600'
-                    : 'text-white'
+                    : 'text-white',
                 ]"
-                :aria-current="isActiveRoute(`/category/${category.name_slug}`) ? 'page' : undefined"
+                :aria-current="
+                  isActiveRoute(`/category/${category.name_slug}`)
+                    ? 'page'
+                    : undefined
+                "
                 @click="closeMenu"
               >
                 {{ category.name }}
@@ -112,8 +124,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { CategoryListResponse } from '~/types';
-
+import type { CategoryListResponse } from "~/types";
 
 // Constants
 const HEADER_HEIGHT = "68px";
@@ -128,7 +139,7 @@ const { data: categories, error } = await useFetch<CategoryListResponse>(
   `${useRuntimeConfig().public.apiBase}/api/v1/categories?show_on_menu=true`,
   {
     headers: {
-      'User-Agent': 'PolitikIndonesia/1.0',
+      "User-Agent": "PolitikIndonesia/1.0",
     },
     server: true,
   }
@@ -138,7 +149,7 @@ const { data: categories, error } = await useFetch<CategoryListResponse>(
 if (error.value) {
   throw createError({
     statusCode: error.value.statusCode || 500,
-    statusMessage: error.value.statusMessage || 'Failed to fetch categories',
+    statusMessage: error.value.statusMessage || "Failed to fetch categories",
     fatal: false,
   });
 }
