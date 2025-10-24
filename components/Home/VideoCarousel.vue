@@ -51,10 +51,12 @@
             :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
           >
             <div
-              v-for="i in (isMobile ? 1 : 4)"
+              v-for="i in isMobile ? 1 : 4"
               :key="i"
-              class="w-full aspect-[9/16] rounded-lg bg-grayscale-20 animate-pulse"
-            />
+              class="w-full aspect-[9/16] rounded-lg animate-pulse"
+            >
+            <img src="/videothumbnail.png" alt="Video Thumbnail" class="w-full aspect-[9/16] object-cover rounded-lg" />
+            </div>
           </div>
 
           <!-- Videos Grid -->
@@ -114,16 +116,24 @@
                 </div>
                 <div
                   class="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300 ease-in-out pointer-events-none"
-                  :class="isMobile ? 'translate-y-0' : 'translate-y-full group-hover:translate-y-0'"
+                  :class="
+                    isMobile
+                      ? 'translate-y-0'
+                      : 'translate-y-full group-hover:translate-y-0'
+                  "
                 >
-                  <div class="bg-gradient-to-t from-black/80 to-transparent rounded-b-lg p-4 -m-4 pointer-events-auto">
+                  <div
+                    class="bg-gradient-to-t from-black/80 to-transparent rounded-b-lg p-4 -m-4 pointer-events-auto"
+                  >
                     <NuxtLink
                       :to="`/video/${video.video_slug}`"
                       class="block text-white hover:text-brand-300 transition-colors duration-200 pointer-events-auto"
                       :aria-label="`Baca artikel: ${video.title}`"
                       @click.stop
                     >
-                      <h3 class="text-sm font-semibold line-clamp-2 leading-tight">
+                      <h3
+                        class="text-sm font-semibold line-clamp-2 leading-tight"
+                      >
                         {{ video.title }}
                       </h3>
                     </NuxtLink>
@@ -139,7 +149,7 @@
               :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
             >
               <div
-                v-for="i in (isMobile ? 1 : 4)"
+                v-for="i in isMobile ? 1 : 4"
                 :key="i"
                 class="w-full aspect-[9/16] rounded-lg bg-grayscale-20 animate-pulse"
               />
@@ -152,31 +162,31 @@
 </template>
 
 <script lang="ts" setup>
-import type { VideoPostListResponse } from '~/types'
-import { isIOSDevice } from '~/utils/device'
+import type { VideoPostListResponse } from "~/types";
+import { isIOSDevice } from "~/utils/device";
 
-const isIOS = computed(() => isIOSDevice())
+const isIOS = computed(() => isIOSDevice());
 const { isMobile, videosPerPage, calculateGridStyle } =
-  useVideoCarouselResponsive()
+  useVideoCarouselResponsive();
 
 // API state
-const videos = ref<VideoPostListResponse>()
-const currentPage = ref<number>(1)
-const isLoading = ref(false)
+const videos = ref<VideoPostListResponse>();
+const currentPage = ref<number>(1);
+const isLoading = ref(false);
 
 // Video play state tracking
-const playingVideoIds = ref<Set<number>>(new Set())
+const playingVideoIds = ref<Set<number>>(new Set());
 
 // State untuk melacak video yang baru saja diklik (untuk menampilkan icon)
-const clickedVideoIds = ref<Set<number>>(new Set())
-const iconTimers = ref<Map<number, NodeJS.Timeout>>(new Map())
+const clickedVideoIds = ref<Set<number>>(new Set());
+const iconTimers = ref<Map<number, NodeJS.Timeout>>(new Map());
 
 // Computed perPage based on screen size (mobile: 1, desktop: 4)
-const perPage = computed(() => videosPerPage.value)
+const perPage = computed(() => videosPerPage.value);
 
 // Computed: Check if has next/prev page from API links
-const hasNextPage = computed(() => videos.value?.links?.next !== null)
-const hasPrevPage = computed(() => videos.value?.links?.prev !== null)
+const hasNextPage = computed(() => videos.value?.links?.next !== null);
+const hasPrevPage = computed(() => videos.value?.links?.prev !== null);
 
 const {
   activeVideoId,
@@ -188,168 +198,175 @@ const {
   pauseAllVideos,
   clearAllVideoRefs,
   videoRefs,
-} = useVideoCarousel([], videosPerPage)
+} = useVideoCarousel([], videosPerPage);
 
 // Function to check if video is currently playing
 const isVideoPlaying = (videoId: number): boolean => {
   // Use reactive state as primary source
-  const isPlaying = playingVideoIds.value.has(videoId)
+  const isPlaying = playingVideoIds.value.has(videoId);
 
   // Fallback to video element check
-  const videoElement = videoRefs.value.get(videoId)
-  const elementIsPlaying = videoElement ? !videoElement.paused : false
+  const videoElement = videoRefs.value.get(videoId);
+  const elementIsPlaying = videoElement ? !videoElement.paused : false;
 
-  console.log('isVideoPlaying debug:', {
+  console.log("isVideoPlaying debug:", {
     videoId,
     reactiveState: isPlaying,
     elementState: elementIsPlaying,
     hasVideoElement: !!videoElement,
     paused: videoElement?.paused,
-    playingVideoIds: Array.from(playingVideoIds.value)
-  })
+    playingVideoIds: Array.from(playingVideoIds.value),
+  });
 
-  return isPlaying || elementIsPlaying
-}
+  return isPlaying || elementIsPlaying;
+};
 
 // Function to check if video was recently clicked (untuk menampilkan icon)
 const isVideoClicked = (videoId: number): boolean => {
-  return clickedVideoIds.value.has(videoId)
-}
+  return clickedVideoIds.value.has(videoId);
+};
 
 // Function to show icon for a specific video
 const showIconForVideo = (videoId: number) => {
   // Clear existing timer if any
-  const existingTimer = iconTimers.value.get(videoId)
+  const existingTimer = iconTimers.value.get(videoId);
   if (existingTimer) {
-    clearTimeout(existingTimer)
+    clearTimeout(existingTimer);
   }
 
   // Add video to clicked set
-  clickedVideoIds.value.add(videoId)
+  clickedVideoIds.value.add(videoId);
 
   // Set timer to hide icon after 1 second
   const timer = setTimeout(() => {
-    clickedVideoIds.value.delete(videoId)
-    iconTimers.value.delete(videoId)
-  }, 1000)
+    clickedVideoIds.value.delete(videoId);
+    iconTimers.value.delete(videoId);
+  }, 1000);
 
-  iconTimers.value.set(videoId, timer)
-}
+  iconTimers.value.set(videoId, timer);
+};
 
 // Function to hide icon for a specific video
 const hideIconForVideo = (videoId: number) => {
-  const timer = iconTimers.value.get(videoId)
+  const timer = iconTimers.value.get(videoId);
   if (timer) {
-    clearTimeout(timer)
-    iconTimers.value.delete(videoId)
+    clearTimeout(timer);
+    iconTimers.value.delete(videoId);
   }
-  clickedVideoIds.value.delete(videoId)
-}
+  clickedVideoIds.value.delete(videoId);
+};
 
 // Function to toggle video play/pause when button is clicked
 const toggleVideoPlayback = (videoId: number) => {
-  const videoElement = videoRefs.value.get(videoId)
-  const isCurrentlyPlaying = playingVideoIds.value.has(videoId)
+  const videoElement = videoRefs.value.get(videoId);
+  const isCurrentlyPlaying = playingVideoIds.value.has(videoId);
 
   // Show icon when clicked
-  showIconForVideo(videoId)
+  showIconForVideo(videoId);
 
   if (videoElement) {
     if (isCurrentlyPlaying || !videoElement.paused) {
-      console.log('Pausing video:', videoId)
+      console.log("Pausing video:", videoId);
       // Pause the current video
-      videoElement.pause()
-      playingVideoIds.value.delete(videoId)
+      videoElement.pause();
+      playingVideoIds.value.delete(videoId);
     } else {
-      console.log('Playing video:', videoId)
+      console.log("Playing video:", videoId);
       // Pause all other videos first
-      handlePlay(videoId)
+      handlePlay(videoId);
       // Clear all playing states
-      playingVideoIds.value.clear()
+      playingVideoIds.value.clear();
       // Then play the selected video
-      videoElement.play().then(() => {
-        playingVideoIds.value.add(videoId)
-      }).catch((error) => {
-        console.warn('Error playing video:', error)
-      })
+      videoElement
+        .play()
+        .then(() => {
+          playingVideoIds.value.add(videoId);
+        })
+        .catch((error) => {
+          console.warn("Error playing video:", error);
+        });
     }
   } else {
-    console.warn('Video element not found for ID:', videoId)
+    console.warn("Video element not found for ID:", videoId);
   }
-}
+};
 
 async function getVideos() {
   try {
-    isLoading.value = true
-    const response = await $fetch<VideoPostListResponse>(`${useRuntimeConfig().public.apiBase}/api/v1/video-posts?${new URLSearchParams({
-      page: currentPage.value.toString(),
-      per_page: perPage.value.toString(),
-    })}`)
+    isLoading.value = true;
+    const response = await $fetch<VideoPostListResponse>(
+      `${
+        useRuntimeConfig().public.apiBase
+      }/api/v1/video-posts?${new URLSearchParams({
+        page: currentPage.value.toString(),
+        per_page: perPage.value.toString(),
+      })}`
+    );
 
-    videos.value = response
+    videos.value = response;
   } catch (error) {
-    console.error('Error fetching videos:', error)
+    console.error("Error fetching videos:", error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 // Navigate to next page
 async function goToNext() {
   if (hasNextPage.value && !isLoading.value) {
-    pauseAllVideos()
+    pauseAllVideos();
     // Clear all icon timers when changing page
-    iconTimers.value.forEach((timer) => clearTimeout(timer))
-    iconTimers.value.clear()
-    clickedVideoIds.value.clear()
-    currentPage.value++
-    await getVideos()
+    iconTimers.value.forEach((timer) => clearTimeout(timer));
+    iconTimers.value.clear();
+    clickedVideoIds.value.clear();
+    currentPage.value++;
+    await getVideos();
   }
 }
 
 // Navigate to previous page
 async function goToPrev() {
   if (hasPrevPage.value && !isLoading.value) {
-    pauseAllVideos()
+    pauseAllVideos();
     // Clear all icon timers when changing page
-    iconTimers.value.forEach((timer) => clearTimeout(timer))
-    iconTimers.value.clear()
-    clickedVideoIds.value.clear()
-    currentPage.value--
-    await getVideos()
+    iconTimers.value.forEach((timer) => clearTimeout(timer));
+    iconTimers.value.clear();
+    clickedVideoIds.value.clear();
+    currentPage.value--;
+    await getVideos();
   }
 }
 
 // Watch for mobile/desktop switch and reset to page 1
-const prevIsMobile = ref(isMobile.value)
+const prevIsMobile = ref(isMobile.value);
 watch(isMobile, async (newValue) => {
   if (prevIsMobile.value !== newValue) {
-    pauseAllVideos()
+    pauseAllVideos();
     // Clear all icon timers when switching mobile/desktop
-    iconTimers.value.forEach((timer) => clearTimeout(timer))
-    iconTimers.value.clear()
-    clickedVideoIds.value.clear()
-    currentPage.value = 1
-    await getVideos()
-    prevIsMobile.value = newValue
+    iconTimers.value.forEach((timer) => clearTimeout(timer));
+    iconTimers.value.clear();
+    clickedVideoIds.value.clear();
+    currentPage.value = 1;
+    await getVideos();
+    prevIsMobile.value = newValue;
   }
-})
+});
 
 // Initial load
 onMounted(() => {
-  getVideos()
-})
+  getVideos();
+});
 
 // Cleanup video refs and timers on unmount
 onUnmounted(() => {
-  clearAllVideoRefs()
+  clearAllVideoRefs();
   // Clear all icon timers
   iconTimers.value.forEach((timer) => {
-    clearTimeout(timer)
-  })
-  iconTimers.value.clear()
-  clickedVideoIds.value.clear()
-})
+    clearTimeout(timer);
+  });
+  iconTimers.value.clear();
+  clickedVideoIds.value.clear();
+});
 </script>
 
 <style></style>
