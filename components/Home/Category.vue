@@ -7,7 +7,7 @@
           id="category-section-title"
           class="text-title text-2xl font-bold border-l-4 border-brand-600 pl-2"
         >
-          Kategori Berita
+          Index Berita
         </h2>
 
         <nav
