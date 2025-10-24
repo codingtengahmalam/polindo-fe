@@ -80,49 +80,6 @@
                   : 'none',
               }"
             >
-              <!-- Clone of last set for seamless loop (next) -->
-              <div v-if="videoSets.length > 0" class="w-full flex-shrink-0">
-                <div
-                  class="grid gap-4"
-                  :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
-                >
-                  <div
-                    v-for="(video, index) in videoSets[videoSets.length - 1]"
-                    :key="`clone-last-${video.id}`"
-                    class="relative group"
-                  >
-                    <video
-                      :src="`${video.video_path}#t=0.001`"
-                      preload="metadata"
-                      controlsList="nodownload"
-                      disablePictureInPicture
-                      playsinline
-                      poster="/videothumbnail.png"
-                      class="w-full aspect-[9/16] object-cover rounded-lg"
-                    >
-                      Your browser doesn't support video formats.
-                    </video>
-                    <div class="absolute bottom-0 left-0 right-0 p-4">
-                      <div
-                        class="bg-gradient-to-t from-black/80 to-transparent rounded-b-lg p-4 -m-4"
-                      >
-                        <NuxtLink
-                          :to="`/video/${video.video_slug}`"
-                          class="block text-white hover:text-brand-300 transition-colors duration-200"
-                          :aria-label="`Read article: ${video.title}`"
-                        >
-                          <h3
-                            class="text-sm font-semibold line-clamp-2 leading-tight"
-                          >
-                            {{ video.title }}
-                          </h3>
-                        </NuxtLink>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               <!-- Original video sets -->
               <div
                 v-for="(videoSet, setIndex) in videoSets"
@@ -211,49 +168,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Clone of first set for seamless loop (prev) -->
-              <div v-if="videoSets.length > 0" class="w-full flex-shrink-0">
-                <div
-                  class="grid gap-4"
-                  :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
-                >
-                  <div
-                    v-for="(video, index) in videoSets[0]"
-                    :key="`clone-first-${video.id}`"
-                    class="relative group"
-                  >
-                    <video
-                      :src="`${video.video_path}#t=0.001`"
-                      preload="metadata"
-                      controlsList="nodownload"
-                      disablePictureInPicture
-                      playsinline
-                      poster="/videothumbnail.png"
-                      class="w-full aspect-[9/16] object-cover rounded-lg"
-                    >
-                      Your browser doesn't support video formats.
-                    </video>
-                    <div class="absolute bottom-0 left-0 right-0 p-4">
-                      <div
-                        class="bg-gradient-to-t from-black/80 to-transparent rounded-b-lg p-4 -m-4"
-                      >
-                        <NuxtLink
-                          :to="`/video/${video.video_slug}`"
-                          class="block text-white hover:text-brand-300 transition-colors duration-200"
-                          :aria-label="`Read article: ${video.title}`"
-                        >
-                          <h3
-                            class="text-sm font-semibold line-clamp-2 leading-tight"
-                          >
-                            {{ video.title }}
-                          </h3>
-                        </NuxtLink>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -279,9 +193,9 @@
 import type { VideoPostListResponse, VideoPost } from "~/types";
 
 // Constants
-const AUTO_SLIDE_INTERVAL = 5000; // 5 seconds
+const AUTO_SLIDE_INTERVAL = 10000; // 10 seconds
 const ICON_DISPLAY_DURATION = 1000; // 1 second
-const SLIDE_DURATION = 500; // milliseconds (reduced for better responsiveness)
+const SLIDE_DURATION = 700; // milliseconds (reduced for better responsiveness)
 
 // Composables
 const { isMobile, videosPerPage } = useVideoCarouselResponsive();
@@ -340,10 +254,6 @@ const currentVideos = computed(() => {
   return allVideos.value.slice(startIndex, endIndex);
 });
 
-// Computed: Get first and last items for seamless loop (kept for compatibility)
-const firstItem = computed(() => allVideos.value[0]);
-const lastItem = computed(() => allVideos.value[allVideos.value.length - 1]);
-
 // Computed: Split videos into sets for slider (optimized)
 const videoSets = computed(() => {
   if (allVideos.value.length === 0) return [];
@@ -361,7 +271,7 @@ const videoSets = computed(() => {
 // Video carousel composable
 const {
   activeVideoId,
-  setVideoRef,
+  setVideoRef: originalSetVideoRef,
   handlePlay,
   handleMouseEnter,
   handleMouseLeave,
@@ -370,6 +280,9 @@ const {
   clearAllVideoRefs,
   videoRefs,
 } = useVideoCarousel([], videosPerPage);
+
+// Use the original setVideoRef directly
+const setVideoRef = originalSetVideoRef;
 
 // ============================================================================
 // Video Control Functions
@@ -410,24 +323,29 @@ const toggleVideoPlayback = (videoId: number) => {
   const videoElement = videoRefs.value.get(videoId);
   const isCurrentlyPlaying = playingVideoIds.value.has(videoId);
 
+  if (!videoElement) {
+    console.warn("Video element not found for ID:", videoId);
+    return;
+  }
+
   showIconForVideo(videoId);
 
-  if (videoElement) {
-    if (isCurrentlyPlaying || !videoElement.paused) {
-      videoElement.pause();
-      playingVideoIds.value.delete(videoId);
-    } else {
-      handlePlay(videoId);
-      playingVideoIds.value.clear();
-      videoElement
-        .play()
-        .then(() => {
-          playingVideoIds.value.add(videoId);
-        })
-        .catch((error) => {
-          console.warn("Error playing video:", error);
-        });
-    }
+  if (isCurrentlyPlaying || !videoElement.paused) {
+    videoElement.pause();
+    playingVideoIds.value.delete(videoId);
+  } else {
+    // Pause all other videos first
+    handlePlay(videoId);
+    playingVideoIds.value.clear();
+
+    videoElement
+      .play()
+      .then(() => {
+        playingVideoIds.value.add(videoId);
+      })
+      .catch((error) => {
+        console.warn("Error playing video:", error);
+      });
   }
 };
 
@@ -556,14 +474,10 @@ async function goToNext() {
       isSliding.value = false;
     }, SLIDE_DURATION);
   } else {
-    // Loop to first set when reaching the end
+    // Simple loop to first set when reaching the end
+    currentDisplayIndex.value = 0;
     setTimeout(() => {
-      isTransitioning.value = false;
-      currentDisplayIndex.value = 0;
-      setTimeout(() => {
-        isTransitioning.value = true;
-        isSliding.value = false;
-      }, 50);
+      isSliding.value = false;
     }, SLIDE_DURATION);
   }
 }
@@ -586,14 +500,10 @@ async function goToPrev() {
       isSliding.value = false;
     }, SLIDE_DURATION);
   } else {
-    // Loop to last set when reaching the beginning
+    // Simple loop to last set when reaching the beginning
+    currentDisplayIndex.value = videoSets.value.length - 1;
     setTimeout(() => {
-      isTransitioning.value = false;
-      currentDisplayIndex.value = videoSets.value.length - 1;
-      setTimeout(() => {
-        isTransitioning.value = true;
-        isSliding.value = false;
-      }, 50);
+      isSliding.value = false;
     }, SLIDE_DURATION);
   }
 }
