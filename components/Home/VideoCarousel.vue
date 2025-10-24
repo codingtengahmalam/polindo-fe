@@ -100,7 +100,7 @@
                 class="absolute inset-0 rounded-lg"
                 @click="toggleVideoPlayback(video.id)"
               >
-                <!-- Icon Play/Pause - hanya tampil ketika diklik -->
+                <!-- Icon Play/Pause - only shows when clicked -->
                 <div
                   v-if="isVideoClicked(video.id)"
                   class="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
@@ -132,7 +132,7 @@
                     <NuxtLink
                       :to="`/video/${video.video_slug}`"
                       class="block text-white hover:text-brand-300 transition-colors duration-200 pointer-events-auto"
-                      :aria-label="`Baca artikel: ${video.title}`"
+                      :aria-label="`Read article: ${video.title}`"
                       @click.stop
                     >
                       <h3
@@ -167,28 +167,29 @@
 
 <script lang="ts" setup>
 import type { VideoPostListResponse, VideoPost } from "~/types";
-import { isIOSDevice } from "~/utils/device";
 
-const isIOS = computed(() => isIOSDevice());
-const { isMobile, videosPerPage, calculateGridStyle } =
-  useVideoCarouselResponsive();
+// Constants
+const AUTO_SLIDE_INTERVAL = 5000; // 5 seconds
+const ICON_DISPLAY_DURATION = 1000; // 1 second
+
+// Composables
+const { isMobile, videosPerPage } = useVideoCarouselResponsive();
 
 // API state
 const videos = ref<VideoPostListResponse>();
-const allVideos = ref<VideoPost[]>([]); // Store all fetched videos
-const currentDisplayIndex = ref<number>(0); // Current starting index for display
+const allVideos = ref<VideoPost[]>([]);
+const currentDisplayIndex = ref<number>(0);
 const isLoading = ref(false);
 const isFetchingMore = ref(false);
 const hasMoreData = ref(true);
 
-// Auto slide constants
-const AUTO_SLIDE_INTERVAL = 5000; // 5 seconds
+// Auto slide state
 let autoSlideTimer: ReturnType<typeof setInterval> | null = null;
 
 // Video play state tracking
 const playingVideoIds = ref<Set<number>>(new Set());
 
-// State untuk melacak video yang baru saja diklik (untuk menampilkan icon)
+// State to track recently clicked videos (for showing icons)
 const clickedVideoIds = ref<Set<number>>(new Set());
 const iconTimers = ref<Map<number, NodeJS.Timeout>>(new Map());
 
@@ -213,6 +214,7 @@ const currentVideos = computed(() => {
   return allVideos.value.slice(startIndex, endIndex);
 });
 
+// Video carousel composable
 const {
   activeVideoId,
   setVideoRef,
@@ -225,83 +227,54 @@ const {
   videoRefs,
 } = useVideoCarousel([], videosPerPage);
 
-// Function to check if video is currently playing
-const isVideoPlaying = (videoId: number): boolean => {
-  // Use reactive state as primary source
-  const isPlaying = playingVideoIds.value.has(videoId);
+// ============================================================================
+// Video Control Functions
+// ============================================================================
 
-  // Fallback to video element check
+// Check if video is currently playing
+const isVideoPlaying = (videoId: number): boolean => {
+  const isPlaying = playingVideoIds.value.has(videoId);
   const videoElement = videoRefs.value.get(videoId);
   const elementIsPlaying = videoElement ? !videoElement.paused : false;
-
-  console.log("isVideoPlaying debug:", {
-    videoId,
-    reactiveState: isPlaying,
-    elementState: elementIsPlaying,
-    hasVideoElement: !!videoElement,
-    paused: videoElement?.paused,
-    playingVideoIds: Array.from(playingVideoIds.value),
-  });
-
   return isPlaying || elementIsPlaying;
 };
 
-// Function to check if video was recently clicked (untuk menampilkan icon)
+// Check if video was recently clicked (for showing icons)
 const isVideoClicked = (videoId: number): boolean => {
   return clickedVideoIds.value.has(videoId);
 };
 
-// Function to show icon for a specific video
+// Show icon for a specific video
 const showIconForVideo = (videoId: number) => {
-  // Clear existing timer if any
   const existingTimer = iconTimers.value.get(videoId);
   if (existingTimer) {
     clearTimeout(existingTimer);
   }
 
-  // Add video to clicked set
   clickedVideoIds.value.add(videoId);
 
-  // Set timer to hide icon after 1 second
   const timer = setTimeout(() => {
     clickedVideoIds.value.delete(videoId);
     iconTimers.value.delete(videoId);
-  }, 1000);
+  }, ICON_DISPLAY_DURATION);
 
   iconTimers.value.set(videoId, timer);
 };
 
-// Function to hide icon for a specific video
-const hideIconForVideo = (videoId: number) => {
-  const timer = iconTimers.value.get(videoId);
-  if (timer) {
-    clearTimeout(timer);
-    iconTimers.value.delete(videoId);
-  }
-  clickedVideoIds.value.delete(videoId);
-};
-
-// Function to toggle video play/pause when button is clicked
+// Toggle video play/pause when button is clicked
 const toggleVideoPlayback = (videoId: number) => {
   const videoElement = videoRefs.value.get(videoId);
   const isCurrentlyPlaying = playingVideoIds.value.has(videoId);
 
-  // Show icon when clicked
   showIconForVideo(videoId);
 
   if (videoElement) {
     if (isCurrentlyPlaying || !videoElement.paused) {
-      console.log("Pausing video:", videoId);
-      // Pause the current video
       videoElement.pause();
       playingVideoIds.value.delete(videoId);
     } else {
-      console.log("Playing video:", videoId);
-      // Pause all other videos first
       handlePlay(videoId);
-      // Clear all playing states
       playingVideoIds.value.clear();
-      // Then play the selected video
       videoElement
         .play()
         .then(() => {
@@ -311,10 +284,31 @@ const toggleVideoPlayback = (videoId: number) => {
           console.warn("Error playing video:", error);
         });
     }
-  } else {
-    console.warn("Video element not found for ID:", videoId);
   }
 };
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+// Clear all icon timers and clicked states
+const clearAllIconStates = () => {
+  iconTimers.value.forEach((timer) => clearTimeout(timer));
+  iconTimers.value.clear();
+  clickedVideoIds.value.clear();
+};
+
+// Update videos display
+const updateVideosDisplay = () => {
+  videos.value = {
+    ...videos.value!,
+    data: currentVideos.value
+  };
+};
+
+// ============================================================================
+// API Functions
+// ============================================================================
 
 // Fetch initial videos (16 for desktop, 5 for mobile)
 async function getInitialVideos() {
@@ -331,7 +325,6 @@ async function getInitialVideos() {
       })}`
     );
 
-    // Store all videos and create response structure
     allVideos.value = response.data;
     videos.value = {
       data: currentVideos.value,
@@ -339,10 +332,8 @@ async function getInitialVideos() {
       meta: response.meta
     };
 
-    // Check if there's more data available
     hasMoreData.value = response.links.next !== null;
 
-    // Start auto slide after data is loaded
     if (autoSlideTimer === null) {
       startAutoSlide();
     }
@@ -371,10 +362,7 @@ async function fetchMoreVideos() {
       })}`
     );
 
-    // Append new videos to existing array
     allVideos.value.push(...response.data);
-
-    // Check if there's more data available
     hasMoreData.value = response.links.next !== null;
   } catch (error) {
     console.error("Error fetching more videos:", error);
@@ -383,48 +371,35 @@ async function fetchMoreVideos() {
   }
 }
 
+// ============================================================================
+// Navigation Functions
+// ============================================================================
+
 // Navigate to next page
 async function goToNext() {
   if (!hasNextPage.value || isLoading.value) return;
 
   pauseAllVideos();
-  // Clear all icon timers when changing page
-  iconTimers.value.forEach((timer) => clearTimeout(timer));
-  iconTimers.value.clear();
-  clickedVideoIds.value.clear();
+  clearAllIconStates();
 
   const nextIndex = currentDisplayIndex.value + perPage.value;
 
-  // Check if we need to fetch more data
   if (nextIndex >= allVideos.value.length && hasMoreData.value) {
     await fetchMoreVideos();
   }
 
-  // Navigate to next set of videos
   if (nextIndex < allVideos.value.length) {
     currentDisplayIndex.value = nextIndex;
-    // Update videos.value to reflect current display
-    videos.value = {
-      ...videos.value!,
-      data: currentVideos.value
-    };
+    updateVideosDisplay();
   } else if (hasMoreData.value) {
-    // If we still have more data but couldn't fetch it, try again
     await fetchMoreVideos();
     if (nextIndex < allVideos.value.length) {
       currentDisplayIndex.value = nextIndex;
-      videos.value = {
-        ...videos.value!,
-        data: currentVideos.value
-      };
+      updateVideosDisplay();
     }
   } else {
-    // Loop to first page when reaching the end
     currentDisplayIndex.value = 0;
-    videos.value = {
-      ...videos.value!,
-      data: currentVideos.value
-    };
+    updateVideosDisplay();
   }
 }
 
@@ -433,38 +408,29 @@ async function goToPrev() {
   if (!hasPrevPage.value || isLoading.value) return;
 
   pauseAllVideos();
-  // Clear all icon timers when changing page
-  iconTimers.value.forEach((timer) => clearTimeout(timer));
-  iconTimers.value.clear();
-  clickedVideoIds.value.clear();
+  clearAllIconStates();
 
   const prevIndex = currentDisplayIndex.value - perPage.value;
 
   if (prevIndex >= 0) {
-    // Navigate to previous set of videos
     currentDisplayIndex.value = prevIndex;
-    videos.value = {
-      ...videos.value!,
-      data: currentVideos.value
-    };
+    updateVideosDisplay();
   } else {
-    // Loop to last available set when reaching the beginning
     const lastPossibleIndex = Math.max(0, allVideos.value.length - perPage.value);
     currentDisplayIndex.value = lastPossibleIndex;
-    videos.value = {
-      ...videos.value!,
-      data: currentVideos.value
-    };
+    updateVideosDisplay();
   }
 }
 
-// Auto slide functions
+// ============================================================================
+// Auto Slide Functions
+// ============================================================================
+
 const startAutoSlide = () => {
-  // Only start auto slide if we have multiple sets of videos
   const totalSets = Math.ceil(allVideos.value.length / perPage.value);
   if (totalSets <= 1) return;
 
-  stopAutoSlide(); // Clear any existing timer
+  stopAutoSlide();
 
   autoSlideTimer = setInterval(() => {
     goToNext();
@@ -480,7 +446,7 @@ const stopAutoSlide = () => {
 
 // Handle manual navigation (stops auto slide)
 const handleManualNavigation = (direction: 'prev' | 'next') => {
-  stopAutoSlide(); // Stop auto slide when user manually navigates
+  stopAutoSlide();
   if (direction === 'prev') {
     goToPrev();
   } else {
@@ -488,33 +454,26 @@ const handleManualNavigation = (direction: 'prev' | 'next') => {
   }
 };
 
+// ============================================================================
+// Lifecycle & Watchers
+// ============================================================================
+
 // Watch for mobile/desktop switch and reset to index 0
 const prevIsMobile = ref(isMobile.value);
 watch(isMobile, async (newValue) => {
   if (prevIsMobile.value !== newValue) {
     pauseAllVideos();
-    stopAutoSlide(); // Stop auto slide when switching
-    // Clear all icon timers when switching mobile/desktop
-    iconTimers.value.forEach((timer) => clearTimeout(timer));
-    iconTimers.value.clear();
-    clickedVideoIds.value.clear();
+    stopAutoSlide();
+    clearAllIconStates();
 
-    // Reset to first set of videos
     currentDisplayIndex.value = 0;
 
-    // If we don't have enough data for the new screen size, fetch more
     const batchSize = newValue ? 5 : 16;
     if (allVideos.value.length < batchSize && hasMoreData.value) {
       await fetchMoreVideos();
     }
 
-    // Update videos display
-    videos.value = {
-      ...videos.value!,
-      data: currentVideos.value
-    };
-
-    // Restart auto slide after data is loaded
+    updateVideosDisplay();
     startAutoSlide();
     prevIsMobile.value = newValue;
   }
@@ -523,20 +482,14 @@ watch(isMobile, async (newValue) => {
 // Initial load
 onMounted(async () => {
   await getInitialVideos();
-  // Start auto slide after initial data is loaded
   startAutoSlide();
 });
 
-// Cleanup video refs and timers on unmount
+// Cleanup on unmount
 onUnmounted(() => {
   clearAllVideoRefs();
-  stopAutoSlide(); // Stop auto slide timer
-  // Clear all icon timers
-  iconTimers.value.forEach((timer) => {
-    clearTimeout(timer);
-  });
-  iconTimers.value.clear();
-  clickedVideoIds.value.clear();
+  stopAutoSlide();
+  clearAllIconStates();
 });
 </script>
 
