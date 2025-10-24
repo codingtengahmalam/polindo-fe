@@ -71,7 +71,7 @@
           >
             <!-- Video Container with Overlay -->
             <div
-              v-for="(video, index) in videos?.data"
+              v-for="(video, index) in currentVideos"
               :key="video.id"
               class="relative group"
             >
@@ -166,7 +166,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { VideoPostListResponse } from "~/types";
+import type { VideoPostListResponse, VideoPost } from "~/types";
 import { isIOSDevice } from "~/utils/device";
 
 const isIOS = computed(() => isIOSDevice());
@@ -175,8 +175,11 @@ const { isMobile, videosPerPage, calculateGridStyle } =
 
 // API state
 const videos = ref<VideoPostListResponse>();
-const currentPage = ref<number>(1);
+const allVideos = ref<VideoPost[]>([]); // Store all fetched videos
+const currentDisplayIndex = ref<number>(0); // Current starting index for display
 const isLoading = ref(false);
+const isFetchingMore = ref(false);
+const hasMoreData = ref(true);
 
 // Auto slide constants
 const AUTO_SLIDE_INTERVAL = 5000; // 5 seconds
@@ -192,9 +195,23 @@ const iconTimers = ref<Map<number, NodeJS.Timeout>>(new Map());
 // Computed perPage based on screen size (mobile: 1, desktop: 4)
 const perPage = computed(() => videosPerPage.value);
 
-// Computed: Check if has next/prev page from API links
-const hasNextPage = computed(() => videos.value?.links?.next !== null);
-const hasPrevPage = computed(() => videos.value?.links?.prev !== null);
+// Computed: Check if has next/prev page based on available data
+const hasNextPage = computed(() => {
+  const totalAvailable = allVideos.value.length;
+  const nextIndex = currentDisplayIndex.value + perPage.value;
+  return nextIndex < totalAvailable || hasMoreData.value;
+});
+
+const hasPrevPage = computed(() => {
+  return currentDisplayIndex.value > 0;
+});
+
+// Computed: Get current videos to display
+const currentVideos = computed(() => {
+  const startIndex = currentDisplayIndex.value;
+  const endIndex = startIndex + perPage.value;
+  return allVideos.value.slice(startIndex, endIndex);
+});
 
 const {
   activeVideoId,
@@ -299,79 +316,153 @@ const toggleVideoPlayback = (videoId: number) => {
   }
 };
 
-async function getVideos() {
+// Fetch initial videos (16 for desktop, 5 for mobile)
+async function getInitialVideos() {
   try {
     isLoading.value = true;
+    const batchSize = isMobile.value ? 5 : 16;
+
     const response = await $fetch<VideoPostListResponse>(
       `${
         useRuntimeConfig().public.apiBase
       }/api/v1/video-posts?${new URLSearchParams({
-        page: currentPage.value.toString(),
-        per_page: perPage.value.toString(),
+        page: '1',
+        per_page: batchSize.toString(),
       })}`
     );
 
-    videos.value = response;
+    // Store all videos and create response structure
+    allVideos.value = response.data;
+    videos.value = {
+      data: currentVideos.value,
+      links: response.links,
+      meta: response.meta
+    };
 
-    // Start auto slide after data is loaded (only if not initial load)
+    // Check if there's more data available
+    hasMoreData.value = response.links.next !== null;
+
+    // Start auto slide after data is loaded
     if (autoSlideTimer === null) {
       startAutoSlide();
     }
   } catch (error) {
-    console.error("Error fetching videos:", error);
+    console.error("Error fetching initial videos:", error);
   } finally {
     isLoading.value = false;
   }
 }
 
+// Fetch more videos when needed
+async function fetchMoreVideos() {
+  if (isFetchingMore.value || !hasMoreData.value) return;
+
+  try {
+    isFetchingMore.value = true;
+    const batchSize = isMobile.value ? 5 : 16;
+    const currentPage = Math.ceil(allVideos.value.length / batchSize) + 1;
+
+    const response = await $fetch<VideoPostListResponse>(
+      `${
+        useRuntimeConfig().public.apiBase
+      }/api/v1/video-posts?${new URLSearchParams({
+        page: currentPage.toString(),
+        per_page: batchSize.toString(),
+      })}`
+    );
+
+    // Append new videos to existing array
+    allVideos.value.push(...response.data);
+
+    // Check if there's more data available
+    hasMoreData.value = response.links.next !== null;
+  } catch (error) {
+    console.error("Error fetching more videos:", error);
+  } finally {
+    isFetchingMore.value = false;
+  }
+}
+
 // Navigate to next page
 async function goToNext() {
-  if (hasNextPage.value && !isLoading.value) {
-    pauseAllVideos();
-    // Clear all icon timers when changing page
-    iconTimers.value.forEach((timer) => clearTimeout(timer));
-    iconTimers.value.clear();
-    clickedVideoIds.value.clear();
-    currentPage.value++;
-    await getVideos();
-  } else if (!hasNextPage.value && !isLoading.value) {
+  if (!hasNextPage.value || isLoading.value) return;
+
+  pauseAllVideos();
+  // Clear all icon timers when changing page
+  iconTimers.value.forEach((timer) => clearTimeout(timer));
+  iconTimers.value.clear();
+  clickedVideoIds.value.clear();
+
+  const nextIndex = currentDisplayIndex.value + perPage.value;
+
+  // Check if we need to fetch more data
+  if (nextIndex >= allVideos.value.length && hasMoreData.value) {
+    await fetchMoreVideos();
+  }
+
+  // Navigate to next set of videos
+  if (nextIndex < allVideos.value.length) {
+    currentDisplayIndex.value = nextIndex;
+    // Update videos.value to reflect current display
+    videos.value = {
+      ...videos.value!,
+      data: currentVideos.value
+    };
+  } else if (hasMoreData.value) {
+    // If we still have more data but couldn't fetch it, try again
+    await fetchMoreVideos();
+    if (nextIndex < allVideos.value.length) {
+      currentDisplayIndex.value = nextIndex;
+      videos.value = {
+        ...videos.value!,
+        data: currentVideos.value
+      };
+    }
+  } else {
     // Loop to first page when reaching the end
-    pauseAllVideos();
-    iconTimers.value.forEach((timer) => clearTimeout(timer));
-    iconTimers.value.clear();
-    clickedVideoIds.value.clear();
-    currentPage.value = 1;
-    await getVideos();
+    currentDisplayIndex.value = 0;
+    videos.value = {
+      ...videos.value!,
+      data: currentVideos.value
+    };
   }
 }
 
 // Navigate to previous page
 async function goToPrev() {
-  if (hasPrevPage.value && !isLoading.value) {
-    pauseAllVideos();
-    // Clear all icon timers when changing page
-    iconTimers.value.forEach((timer) => clearTimeout(timer));
-    iconTimers.value.clear();
-    clickedVideoIds.value.clear();
-    currentPage.value--;
-    await getVideos();
-  } else if (!hasPrevPage.value && !isLoading.value) {
-    // Loop to last page when reaching the beginning
-    pauseAllVideos();
-    iconTimers.value.forEach((timer) => clearTimeout(timer));
-    iconTimers.value.clear();
-    clickedVideoIds.value.clear();
-    // Get the last page number from API links
-    const lastPage = videos.value?.meta?.last_page || 1;
-    currentPage.value = lastPage;
-    await getVideos();
+  if (!hasPrevPage.value || isLoading.value) return;
+
+  pauseAllVideos();
+  // Clear all icon timers when changing page
+  iconTimers.value.forEach((timer) => clearTimeout(timer));
+  iconTimers.value.clear();
+  clickedVideoIds.value.clear();
+
+  const prevIndex = currentDisplayIndex.value - perPage.value;
+
+  if (prevIndex >= 0) {
+    // Navigate to previous set of videos
+    currentDisplayIndex.value = prevIndex;
+    videos.value = {
+      ...videos.value!,
+      data: currentVideos.value
+    };
+  } else {
+    // Loop to last available set when reaching the beginning
+    const lastPossibleIndex = Math.max(0, allVideos.value.length - perPage.value);
+    currentDisplayIndex.value = lastPossibleIndex;
+    videos.value = {
+      ...videos.value!,
+      data: currentVideos.value
+    };
   }
 }
 
 // Auto slide functions
 const startAutoSlide = () => {
-  // Only start auto slide if we have multiple pages
-  if (!videos.value?.meta || videos.value.meta.last_page <= 1) return;
+  // Only start auto slide if we have multiple sets of videos
+  const totalSets = Math.ceil(allVideos.value.length / perPage.value);
+  if (totalSets <= 1) return;
 
   stopAutoSlide(); // Clear any existing timer
 
@@ -397,7 +488,7 @@ const handleManualNavigation = (direction: 'prev' | 'next') => {
   }
 };
 
-// Watch for mobile/desktop switch and reset to page 1
+// Watch for mobile/desktop switch and reset to index 0
 const prevIsMobile = ref(isMobile.value);
 watch(isMobile, async (newValue) => {
   if (prevIsMobile.value !== newValue) {
@@ -407,8 +498,22 @@ watch(isMobile, async (newValue) => {
     iconTimers.value.forEach((timer) => clearTimeout(timer));
     iconTimers.value.clear();
     clickedVideoIds.value.clear();
-    currentPage.value = 1;
-    await getVideos();
+
+    // Reset to first set of videos
+    currentDisplayIndex.value = 0;
+
+    // If we don't have enough data for the new screen size, fetch more
+    const batchSize = newValue ? 5 : 16;
+    if (allVideos.value.length < batchSize && hasMoreData.value) {
+      await fetchMoreVideos();
+    }
+
+    // Update videos display
+    videos.value = {
+      ...videos.value!,
+      data: currentVideos.value
+    };
+
     // Restart auto slide after data is loaded
     startAutoSlide();
     prevIsMobile.value = newValue;
@@ -417,7 +522,7 @@ watch(isMobile, async (newValue) => {
 
 // Initial load
 onMounted(async () => {
-  await getVideos();
+  await getInitialVideos();
   // Start auto slide after initial data is loaded
   startAutoSlide();
 });
