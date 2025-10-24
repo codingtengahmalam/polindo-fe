@@ -3,6 +3,15 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
+  // App configuration
+  app: {
+    head: {
+      htmlAttrs: {
+        lang: "id",
+      },
+    },
+  },
+
   runtimeConfig: {
     public: {
       apiBase: "https://api.politikindonesia.id",
