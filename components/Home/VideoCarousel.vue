@@ -20,7 +20,7 @@
                 ? 'opacity-30 cursor-not-allowed'
                 : 'hover:text-grayscale-100',
             ]"
-            @click="goToPrev"
+            @click="handleManualNavigation('prev')"
           >
             <IconChevronLeft class="size-3" />
           </button>
@@ -34,7 +34,7 @@
                 ? 'opacity-30 cursor-not-allowed'
                 : 'hover:text-grayscale-100',
             ]"
-            @click="goToNext"
+            @click="handleManualNavigation('next')"
           >
             <IconChevronLeft class="size-3 rotate-180" />
           </button>
@@ -42,7 +42,11 @@
       </div>
 
       <!-- Content Video -->
-      <div class="overflow-hidden">
+      <div
+        class="overflow-hidden"
+        @mouseenter="stopAutoSlide"
+        @mouseleave="startAutoSlide"
+      >
         <ClientOnly>
           <!-- Loading State -->
           <div
@@ -174,6 +178,10 @@ const videos = ref<VideoPostListResponse>();
 const currentPage = ref<number>(1);
 const isLoading = ref(false);
 
+// Auto slide constants
+const AUTO_SLIDE_INTERVAL = 5000; // 5 seconds
+let autoSlideTimer: ReturnType<typeof setInterval> | null = null;
+
 // Video play state tracking
 const playingVideoIds = ref<Set<number>>(new Set());
 
@@ -304,6 +312,11 @@ async function getVideos() {
     );
 
     videos.value = response;
+
+    // Start auto slide after data is loaded (only if not initial load)
+    if (autoSlideTimer === null) {
+      startAutoSlide();
+    }
   } catch (error) {
     console.error("Error fetching videos:", error);
   } finally {
@@ -321,6 +334,14 @@ async function goToNext() {
     clickedVideoIds.value.clear();
     currentPage.value++;
     await getVideos();
+  } else if (!hasNextPage.value && !isLoading.value) {
+    // Loop to first page when reaching the end
+    pauseAllVideos();
+    iconTimers.value.forEach((timer) => clearTimeout(timer));
+    iconTimers.value.clear();
+    clickedVideoIds.value.clear();
+    currentPage.value = 1;
+    await getVideos();
   }
 }
 
@@ -334,32 +355,77 @@ async function goToPrev() {
     clickedVideoIds.value.clear();
     currentPage.value--;
     await getVideos();
+  } else if (!hasPrevPage.value && !isLoading.value) {
+    // Loop to last page when reaching the beginning
+    pauseAllVideos();
+    iconTimers.value.forEach((timer) => clearTimeout(timer));
+    iconTimers.value.clear();
+    clickedVideoIds.value.clear();
+    // Get the last page number from API links
+    const lastPage = videos.value?.meta?.last_page || 1;
+    currentPage.value = lastPage;
+    await getVideos();
   }
 }
+
+// Auto slide functions
+const startAutoSlide = () => {
+  // Only start auto slide if we have multiple pages
+  if (!videos.value?.meta || videos.value.meta.last_page <= 1) return;
+
+  stopAutoSlide(); // Clear any existing timer
+
+  autoSlideTimer = setInterval(() => {
+    goToNext();
+  }, AUTO_SLIDE_INTERVAL);
+};
+
+const stopAutoSlide = () => {
+  if (autoSlideTimer) {
+    clearInterval(autoSlideTimer);
+    autoSlideTimer = null;
+  }
+};
+
+// Handle manual navigation (stops auto slide)
+const handleManualNavigation = (direction: 'prev' | 'next') => {
+  stopAutoSlide(); // Stop auto slide when user manually navigates
+  if (direction === 'prev') {
+    goToPrev();
+  } else {
+    goToNext();
+  }
+};
 
 // Watch for mobile/desktop switch and reset to page 1
 const prevIsMobile = ref(isMobile.value);
 watch(isMobile, async (newValue) => {
   if (prevIsMobile.value !== newValue) {
     pauseAllVideos();
+    stopAutoSlide(); // Stop auto slide when switching
     // Clear all icon timers when switching mobile/desktop
     iconTimers.value.forEach((timer) => clearTimeout(timer));
     iconTimers.value.clear();
     clickedVideoIds.value.clear();
     currentPage.value = 1;
     await getVideos();
+    // Restart auto slide after data is loaded
+    startAutoSlide();
     prevIsMobile.value = newValue;
   }
 });
 
 // Initial load
-onMounted(() => {
-  getVideos();
+onMounted(async () => {
+  await getVideos();
+  // Start auto slide after initial data is loaded
+  startAutoSlide();
 });
 
 // Cleanup video refs and timers on unmount
 onUnmounted(() => {
   clearAllVideoRefs();
+  stopAutoSlide(); // Stop auto slide timer
   // Clear all icon timers
   iconTimers.value.forEach((timer) => {
     clearTimeout(timer);
