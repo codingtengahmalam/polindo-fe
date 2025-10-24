@@ -72,13 +72,14 @@
               <!-- Video Element -->
               <video
                 :ref="(el) => setVideoRef(el, video.id, index)"
-                :controls="isIOS || activeVideoId === video.id"
+                :controls="activeVideoId === video.id"
                 :src="`${video.video_path}#t=0.001`"
                 :data-video-id="video.id"
                 preload="metadata"
                 controlsList="nodownload"
                 disablePictureInPicture
                 playsinline
+                poster="/videothumbnail.png"
                 class="w-full aspect-[9/16] object-cover rounded-lg"
                 @play="handlePlay(video.id)"
                 @mouseenter="handleMouseEnter(video.id)"
@@ -93,7 +94,24 @@
                 class="absolute inset-0 rounded-lg"
                 @click="toggleVideoPlayback(video.id)"
               >
-                <!-- Bottom overlay for title (always visible on mobile, hover on desktop) -->
+                <!-- Icon Play/Pause - hanya tampil ketika diklik -->
+                <div
+                  v-if="isVideoClicked(video.id)"
+                  class="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
+                >
+                  <div
+                    v-if="!isVideoPlaying(video.id)"
+                    class="bg-black/50 rounded-full p-3 backdrop-blur-sm"
+                  >
+                    <IconPlay class="size-12 text-white" />
+                  </div>
+                  <div
+                    v-else
+                    class="bg-black/50 rounded-full p-3 backdrop-blur-sm"
+                  >
+                    <IconPause class="size-12 text-white" />
+                  </div>
+                </div>
                 <div
                   class="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300 ease-in-out pointer-events-none"
                   :class="isMobile ? 'translate-y-0' : 'translate-y-full group-hover:translate-y-0'"
@@ -149,6 +167,10 @@ const isLoading = ref(false)
 // Video play state tracking
 const playingVideoIds = ref<Set<number>>(new Set())
 
+// State untuk melacak video yang baru saja diklik (untuk menampilkan icon)
+const clickedVideoIds = ref<Set<number>>(new Set())
+const iconTimers = ref<Map<number, NodeJS.Timeout>>(new Map())
+
 // Computed perPage based on screen size (mobile: 1, desktop: 4)
 const perPage = computed(() => videosPerPage.value)
 
@@ -189,19 +211,48 @@ const isVideoPlaying = (videoId: number): boolean => {
   return isPlaying || elementIsPlaying
 }
 
+// Function to check if video was recently clicked (untuk menampilkan icon)
+const isVideoClicked = (videoId: number): boolean => {
+  return clickedVideoIds.value.has(videoId)
+}
+
+// Function to show icon for a specific video
+const showIconForVideo = (videoId: number) => {
+  // Clear existing timer if any
+  const existingTimer = iconTimers.value.get(videoId)
+  if (existingTimer) {
+    clearTimeout(existingTimer)
+  }
+
+  // Add video to clicked set
+  clickedVideoIds.value.add(videoId)
+
+  // Set timer to hide icon after 1 second
+  const timer = setTimeout(() => {
+    clickedVideoIds.value.delete(videoId)
+    iconTimers.value.delete(videoId)
+  }, 1000)
+
+  iconTimers.value.set(videoId, timer)
+}
+
+// Function to hide icon for a specific video
+const hideIconForVideo = (videoId: number) => {
+  const timer = iconTimers.value.get(videoId)
+  if (timer) {
+    clearTimeout(timer)
+    iconTimers.value.delete(videoId)
+  }
+  clickedVideoIds.value.delete(videoId)
+}
+
 // Function to toggle video play/pause when button is clicked
 const toggleVideoPlayback = (videoId: number) => {
   const videoElement = videoRefs.value.get(videoId)
   const isCurrentlyPlaying = playingVideoIds.value.has(videoId)
 
-  console.log('toggleVideoPlayback debug:', {
-    videoId,
-    hasVideoElement: !!videoElement,
-    paused: videoElement?.paused,
-    isCurrentlyPlaying,
-    videoRefsSize: videoRefs.value.size,
-    allVideoIds: Array.from(videoRefs.value.keys())
-  })
+  // Show icon when clicked
+  showIconForVideo(videoId)
 
   if (videoElement) {
     if (isCurrentlyPlaying || !videoElement.paused) {
@@ -247,6 +298,10 @@ async function getVideos() {
 async function goToNext() {
   if (hasNextPage.value && !isLoading.value) {
     pauseAllVideos()
+    // Clear all icon timers when changing page
+    iconTimers.value.forEach((timer) => clearTimeout(timer))
+    iconTimers.value.clear()
+    clickedVideoIds.value.clear()
     currentPage.value++
     await getVideos()
   }
@@ -256,6 +311,10 @@ async function goToNext() {
 async function goToPrev() {
   if (hasPrevPage.value && !isLoading.value) {
     pauseAllVideos()
+    // Clear all icon timers when changing page
+    iconTimers.value.forEach((timer) => clearTimeout(timer))
+    iconTimers.value.clear()
+    clickedVideoIds.value.clear()
     currentPage.value--
     await getVideos()
   }
@@ -266,6 +325,10 @@ const prevIsMobile = ref(isMobile.value)
 watch(isMobile, async (newValue) => {
   if (prevIsMobile.value !== newValue) {
     pauseAllVideos()
+    // Clear all icon timers when switching mobile/desktop
+    iconTimers.value.forEach((timer) => clearTimeout(timer))
+    iconTimers.value.clear()
+    clickedVideoIds.value.clear()
     currentPage.value = 1
     await getVideos()
     prevIsMobile.value = newValue
@@ -277,9 +340,15 @@ onMounted(() => {
   getVideos()
 })
 
-// Cleanup video refs on unmount
+// Cleanup video refs and timers on unmount
 onUnmounted(() => {
   clearAllVideoRefs()
+  // Clear all icon timers
+  iconTimers.value.forEach((timer) => {
+    clearTimeout(timer)
+  })
+  iconTimers.value.clear()
+  clickedVideoIds.value.clear()
 })
 </script>
 
