@@ -71,10 +71,10 @@
           <div v-else class="relative overflow-hidden">
             <div
               ref="sliderRef"
-              class="flex"
+              class="flex gap-4"
               style="will-change: transform"
               :style="{
-                transform: `translateX(-${currentDisplayIndex * 100}%)`,
+                transform: `translateX(calc(-${currentDisplayIndex * 100}% - ${currentDisplayIndex * 1}rem))`,
                 transition: isTransitioning
                   ? `transform ${SLIDE_DURATION}ms ease-in-out`
                   : 'none',
