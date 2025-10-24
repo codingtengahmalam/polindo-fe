@@ -39,6 +39,18 @@ export interface ArticleAuthor {
 }
 
 /**
+ * Article Editor entity
+ */
+export interface ArticleEditor {
+  id: number;
+  username: string;
+  slug: string;
+  avatar: any;
+  display_name: string;
+}
+
+
+/**
  * Article Category entity (simplified for article context)
  */
 export interface ArticleCategory {
@@ -66,6 +78,7 @@ export interface Article {
   tags: ArticleTag[];
   images: ArticleImages | null;
   author: ArticleAuthor | null;
+  editor: ArticleEditor | null;
   category: ArticleCategory | null;
   created_at: string;
   updated_at: string;

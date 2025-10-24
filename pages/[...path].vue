@@ -1,9 +1,9 @@
 <template>
   <ContentContainer class="px-4 md:px-10 xl:px-20 space-y-5">
-    <div
-      class="flex flex-col xl:flex-row xl:items-start justify-between pt-10"
-    >
-      <section class="w-full xl:w-[750px] xl:shrink-0 space-y-8 xl:pr-5 xl:border-r border-grayscale-10">
+    <div class="flex flex-col xl:flex-row xl:items-start justify-between pt-10">
+      <section
+        class="w-full xl:w-[750px] xl:shrink-0 space-y-8 xl:pr-5 xl:border-r border-grayscale-10"
+      >
         <!-- Article -->
         <article
           itemscope
@@ -73,6 +73,12 @@
             class="prose prose-sm md:prose-base max-w-none text-subtitle"
             v-html="renderedContent"
           />
+
+          <!-- Article Editor -->
+          <p class="flex items-center gap-2 text-subtitle">
+            Editor :
+            <span class="!font-title">{{ data?.editor?.display_name }}</span>
+          </p>
 
           <!-- Article Footer (Tags) -->
           <footer class="space-y-2">
@@ -172,7 +178,7 @@ const { data: articleResponse, error: fetchError } =
     `${useRuntimeConfig().public.apiBase}/api/v1/posts/${fullPath}`,
     {
       headers: {
-        'User-Agent': 'PolitikIndonesia/1.0',
+        "User-Agent": "PolitikIndonesia/1.0",
       },
       server: true,
       // Add proper error handling
@@ -240,10 +246,13 @@ async function fetchRelatedArticles() {
 useHead({
   title: `${data?.value?.title}`,
   meta: [
-    { name: "description", content: `${data?.value?.summary || ''}` },
+    { name: "description", content: `${data?.value?.summary || ""}` },
     { name: "keywords", content: tagsToString(data?.value?.tags || []) },
     { name: "news_keywords", content: tagsToString(data?.value?.tags || []) },
-    { name: "article:author", content: data?.value?.author?.display_name || '' },
+    {
+      name: "article:author",
+      content: data?.value?.author?.display_name || "",
+    },
   ],
 });
 
@@ -252,13 +261,13 @@ const { baseUrl } = useBaseUrl();
 useSeoMeta({
   title: `${data?.value?.title}`,
   ogTitle: `${data?.value?.title}`,
-  description: `${data?.value?.summary || ''}`,
-  ogDescription: `${data?.value?.summary || ''}`,
-  ogImage: data?.value?.images?.big || '',
-  ogImageWidth: '750',
-  ogImageHeight: '422',
+  description: `${data?.value?.summary || ""}`,
+  ogDescription: `${data?.value?.summary || ""}`,
+  ogImage: data?.value?.images?.big || "",
+  ogImageWidth: "750",
+  ogImageHeight: "422",
   ogUrl: `${baseUrl}/article/${data?.value?.title_slug}`,
-  author: data?.value?.author?.display_name || '',
+  author: data?.value?.author?.display_name || "",
 });
 
 function tagsToString(tags: ArticleTag[]) {
