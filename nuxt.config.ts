@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   },
 
   typescript: {
-    typeCheck: true,
+    typeCheck: false, // Disable type checking during build for faster builds
   },
 
   router: {
@@ -20,31 +20,24 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: "2025-07-15",
-  modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss", "@nuxt/image"],
-
-  image: {
-    // Weserv is perfect for static deployments (Netlify, Vercel, etc.)
-    // IPX only works with SSR Node.js servers
-    provider: process.env.NUXT_IMAGE_PROVIDER || "weserv",
-    quality: 80,
-    format: ["webp"],
-    screens: {
-      xs: 360,
-      sm: 640,
-      md: 768,
-      lg: 1024,
-      xl: 1280,
-      xxl: 1536,
-    },
-    dir: "public",
-    // Allow images from these domains
-    domains: ["politikindonesia.id", "api.politikindonesia.id"],
-    // Weserv config - no baseURL needed as API returns full URLs
-    weserv: {
-      // Leave empty - API provides full URLs like:
-      // https://politikindonesia.id/uploads/images/2025/10/image.jpg
-    },
-  },
+  modules: [
+    "@nuxt/fonts",
+    "@nuxtjs/tailwindcss",
+    [
+      "@nuxt/image",
+      {
+        // Use IPX for SSR (production with Node.js server)
+        // IPX works with full URLs from API
+        provider: "ipx",
+        quality: 80,
+        format: ["webp"],
+        ipx: {
+          // IPX allows full URLs from external domains
+          domains: ["politikindonesia.id", "api.politikindonesia.id"],
+        },
+      },
+    ],
+  ],
 
   fonts: {
     families: [

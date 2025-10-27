@@ -1,7 +1,20 @@
 services:
   web:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: polindo-fe:latest
-    container_name: "polindo-fe"
-    build: .
+    container_name: polindo-fe
     ports:
-      - "3001:3000"
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+    networks:
+      - polindo-network
+
+networks:
+  polindo-network:
+    driver: bridge
