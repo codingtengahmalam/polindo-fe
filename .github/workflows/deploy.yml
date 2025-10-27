@@ -39,11 +39,10 @@ jobs:
           cache-to: type=gha,mode=max
       
       - name: Status Check
-       if: success()
+        if: success()
         run: |
-          echo "✅ Docker images successfully built and pushed to GHCR"
-          echo "📦 Images:"
-          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/app:${{ github.sha }}"
-          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/nginx:${{ github.sha }}"
-          echo ""
-          echo "🔗 View images at: https://github.com/${{ github.repository }}/pkgs" 
+            echo "✅ Docker images successfully built and pushed to GHCR"
+            echo "📦 Images:"
+            echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+            echo ""
+            echo "🔗 View images at: https://github.com/${{ github.repository }}/pkgs" 
