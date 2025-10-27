@@ -5,7 +5,7 @@
     </h1>
 
     <!-- Popular Articles -->
-    <div class="space-y-2">
+    <div v-if="articlePopular.length > 0" class="space-y-2">
       <h2
         class="text-title text-2xl font-bold border-l-4 border-brand-600 pl-2"
       >
@@ -247,7 +247,7 @@
           </div>
 
           <div
-            v-else
+            v-else-if="!initialLoading && articlesLatest.length > 0"
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
           >
             <ArticleCard
@@ -258,6 +258,10 @@
               img-height="h-40"
               class="grid-article-divider"
             />
+          </div>
+
+          <div v-else class="text-subtitle text-center py-10">
+            <p>Belum ada berita untuk kategori ini.</p>
           </div>
         </div>
 
@@ -273,20 +277,11 @@
           </h2>
 
           <div
+            v-if="isLoading"
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
           >
-            <ArticleCard
-              v-for="article in otherArticles"
-              :key="article.id"
-              :article="article"
-              :with-category="false"
-              img-height="h-40"
-              class="grid-article-divider"
-            />
-
             <!-- Skeleton loading -->
             <div
-              v-if="isLoading"
               v-for="i in 3"
               :key="`skeleton-${i}`"
               class="bg-white flex flex-col gap-4 animate-pulse"
@@ -309,6 +304,23 @@
                 </div>
               </div>
             </div>
+          </div>
+          <div
+            v-else-if="!initialLoading && otherArticles.length > 0"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
+          >
+            <ArticleCard
+              v-for="article in otherArticles"
+              :key="article.id"
+              :article="article"
+              :with-category="false"
+              img-height="h-40"
+              class="grid-article-divider"
+            />
+          </div>
+
+          <div v-else class="text-subtitle text-center py-10">
+            <p>Belum ada berita untuk kategori ini.</p>
           </div>
 
           <hr class="border-grayscale-10" />

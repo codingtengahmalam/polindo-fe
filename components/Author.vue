@@ -3,9 +3,9 @@
   <NuxtLink
     :to="`/profil/${slug}?id=${id}&name=${name}`"
     class="text-subtitle font-normal text-xs flex items-center gap-1 min-w-0"
-    :title="`Oleh ${name}`"
+    :title="`Pelapor ${name}`"
   >
-    <span class="text-grayscale-40 shrink-0">Oleh</span>
+    <span class="text-grayscale-40 shrink-0">Pelapor</span>
     <span class="truncate">{{ name }}</span>
   </NuxtLink>
 </template>

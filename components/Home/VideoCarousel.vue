@@ -20,7 +20,7 @@
                 ? 'opacity-30 cursor-not-allowed'
                 : 'hover:text-grayscale-100',
             ]"
-            @click="goToPrev"
+            @click="handleManualNavigation('prev')"
           >
             <IconChevronLeft class="size-3" />
           </button>
@@ -34,7 +34,7 @@
                 ? 'opacity-30 cursor-not-allowed'
                 : 'hover:text-grayscale-100',
             ]"
-            @click="goToNext"
+            @click="handleManualNavigation('next')"
           >
             <IconChevronLeft class="size-3 rotate-180" />
           </button>
@@ -42,7 +42,11 @@
       </div>
 
       <!-- Content Video -->
-      <div class="overflow-hidden">
+      <div
+        class="overflow-hidden"
+        @mouseenter="stopAutoSlide"
+        @mouseleave="startAutoSlide"
+      >
         <ClientOnly>
           <!-- Loading State -->
           <div
@@ -51,64 +55,116 @@
             :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
           >
             <div
-              v-for="i in (isMobile ? 1 : 4)"
+              v-for="i in isMobile ? 1 : 4"
               :key="i"
-              class="w-full aspect-[9/16] rounded-lg bg-grayscale-20 animate-pulse"
-            />
+              class="w-full aspect-[9/16] rounded-lg animate-pulse"
+            >
+              <img
+                src="/videothumbnail.png"
+                alt="Video Thumbnail"
+                class="w-full aspect-[9/16] object-cover rounded-lg"
+              />
+            </div>
           </div>
 
-          <!-- Videos Grid -->
-          <div
-            v-else
-            class="grid gap-4 transition-opacity duration-300"
-            :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
-          >
-            <!-- Video Container with Overlay -->
+          <!-- Videos Slider -->
+          <div v-else class="relative overflow-hidden">
             <div
-              v-for="(video, index) in videos?.data"
-              :key="video.id"
-              class="relative group"
+              ref="sliderRef"
+              class="flex gap-4"
+              style="will-change: transform"
+              :style="{
+                transform: `translateX(calc(-${currentDisplayIndex * 100}% - ${currentDisplayIndex * 1}rem))`,
+                transition: isTransitioning
+                  ? `transform ${SLIDE_DURATION}ms ease-in-out`
+                  : 'none',
+              }"
             >
-              <!-- Video Element -->
-              <video
-                :ref="(el) => setVideoRef(el, video.id, index)"
-                :controls="isIOS || activeVideoId === video.id"
-                :src="`${video.video_path}#t=0.001`"
-                :data-video-id="video.id"
-                preload="metadata"
-                controlsList="nodownload"
-                disablePictureInPicture
-                playsinline
-                class="w-full aspect-[9/16] object-cover rounded-lg"
-                @play="handlePlay(video.id)"
-                @mouseenter="handleMouseEnter(video.id)"
-                @mouseleave="handleMouseLeave(video.id)"
-                @touchstart="handleTouchStart(video.id)"
-              >
-                Your browser doesn't support video formats.
-              </video>
-
-              <!-- Overlay with Title - always visible on mobile -->
+              <!-- Original video sets -->
               <div
-                class="absolute inset-0 rounded-lg"
-                @click="toggleVideoPlayback(video.id)"
+                v-for="(videoSet, setIndex) in videoSets"
+                :key="`set-${setIndex}-${videoSet[0]?.id || 0}`"
+                class="w-full flex-shrink-0"
               >
-                <!-- Bottom overlay for title (always visible on mobile, hover on desktop) -->
                 <div
-                  class="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300 ease-in-out pointer-events-none"
-                  :class="isMobile ? 'translate-y-0' : 'translate-y-full group-hover:translate-y-0'"
+                  class="grid gap-4"
+                  :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
                 >
-                  <div class="bg-gradient-to-t from-black/80 to-transparent rounded-b-lg p-4 -m-4 pointer-events-auto">
-                    <NuxtLink
-                      :to="`/video/${video.video_slug}`"
-                      class="block text-white hover:text-brand-300 transition-colors duration-200 pointer-events-auto"
-                      :aria-label="`Baca artikel: ${video.title}`"
-                      @click.stop
+                  <!-- Video Container with Overlay -->
+                  <div
+                    v-for="(video, index) in videoSet"
+                    :key="video.id"
+                    class="relative group"
+                  >
+                    <!-- Video Element -->
+                    <video
+                      :ref="(el) => setVideoRef(el, video.id, index)"
+                      :controls="activeVideoId === video.id"
+                      :src="`${video.video_path}#t=0.001`"
+                      :data-video-id="video.id"
+                      preload="metadata"
+                      controlsList="nodownload"
+                      disablePictureInPicture
+                      playsinline
+                      poster="/videothumbnail.png"
+                      class="w-full aspect-[9/16] object-cover rounded-lg"
+                      @play="handlePlay(video.id)"
+                      @mouseenter="handleMouseEnter(video.id)"
+                      @mouseleave="handleMouseLeave(video.id)"
+                      @touchstart="handleTouchStart(video.id)"
                     >
-                      <h3 class="text-sm font-semibold line-clamp-2 leading-tight">
-                        {{ video.title }}
-                      </h3>
-                    </NuxtLink>
+                      Your browser doesn't support video formats.
+                    </video>
+
+                    <!-- Overlay with Title - always visible on mobile -->
+                    <div
+                      class="absolute inset-0 rounded-lg"
+                      @click="toggleVideoPlayback(video.id)"
+                    >
+                      <!-- Icon Play/Pause - only shows when clicked -->
+                      <div
+                        v-if="isVideoClicked(video.id)"
+                        class="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
+                      >
+                        <div
+                          v-if="!isVideoPlaying(video.id)"
+                          class="bg-black/50 rounded-full p-3 backdrop-blur-sm"
+                        >
+                          <IconPlay class="size-12 text-white" />
+                        </div>
+                        <div
+                          v-else
+                          class="bg-black/50 rounded-full p-3 backdrop-blur-sm"
+                        >
+                          <IconPause class="size-12 text-white" />
+                        </div>
+                      </div>
+                      <div
+                        class="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300 ease-in-out pointer-events-none"
+                        :class="
+                          isMobile
+                            ? 'translate-y-0'
+                            : 'translate-y-full group-hover:translate-y-0'
+                        "
+                      >
+                        <div
+                          class="bg-gradient-to-t from-black/80 to-transparent rounded-b-lg p-4 -m-4 pointer-events-auto"
+                        >
+                          <NuxtLink
+                            :to="`/video/${video.video_slug}`"
+                            class="block text-white hover:text-brand-300 transition-colors duration-200 pointer-events-auto"
+                            :aria-label="`Read article: ${video.title}`"
+                            @click.stop
+                          >
+                            <h3
+                              class="text-sm font-semibold line-clamp-2 leading-tight"
+                            >
+                              {{ video.title }}
+                            </h3>
+                          </NuxtLink>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -121,7 +177,7 @@
               :class="isMobile ? 'grid-cols-1' : 'grid-cols-4'"
             >
               <div
-                v-for="i in (isMobile ? 1 : 4)"
+                v-for="i in isMobile ? 1 : 4"
                 :key="i"
                 class="w-full aspect-[9/16] rounded-lg bg-grayscale-20 animate-pulse"
               />
@@ -134,31 +190,88 @@
 </template>
 
 <script lang="ts" setup>
-import type { VideoPostListResponse } from '~/types'
-import { isIOSDevice } from '~/utils/device'
+import type { VideoPostListResponse, VideoPost } from "~/types";
 
-const isIOS = computed(() => isIOSDevice())
-const { isMobile, videosPerPage, calculateGridStyle } =
-  useVideoCarouselResponsive()
+// Constants
+const AUTO_SLIDE_INTERVAL = 10000; // 10 seconds
+const ICON_DISPLAY_DURATION = 1000; // 1 second
+const SLIDE_DURATION = 700; // milliseconds (reduced for better responsiveness)
+
+// Composables
+const { isMobile, videosPerPage } = useVideoCarouselResponsive();
 
 // API state
-const videos = ref<VideoPostListResponse>()
-const currentPage = ref<number>(1)
-const isLoading = ref(false)
+const videos = ref<VideoPostListResponse>();
+const allVideos = ref<VideoPost[]>([]);
+const currentDisplayIndex = ref<number>(0);
+const isLoading = ref(false);
+const isFetchingMore = ref(false);
+const hasMoreData = ref(true);
+
+// Animation state
+const isSliding = ref(false);
+const isTransitioning = ref(true);
+const sliderRef = ref<HTMLElement | null>(null);
+
+// Auto slide state
+let autoSlideTimer: ReturnType<typeof setInterval> | null = null;
 
 // Video play state tracking
-const playingVideoIds = ref<Set<number>>(new Set())
+const playingVideoIds = ref<Set<number>>(new Set());
+
+// State to track recently clicked videos (for showing icons)
+const clickedVideoIds = ref<Set<number>>(new Set());
+const iconTimers = ref<Map<number, NodeJS.Timeout>>(new Map());
 
 // Computed perPage based on screen size (mobile: 1, desktop: 4)
-const perPage = computed(() => videosPerPage.value)
+const perPage = computed(() => videosPerPage.value);
 
-// Computed: Check if has next/prev page from API links
-const hasNextPage = computed(() => videos.value?.links?.next !== null)
-const hasPrevPage = computed(() => videos.value?.links?.prev !== null)
+// Computed: Check if has next/prev page based on available data
+const hasNextPage = computed(() => {
+  const nextIndex = currentDisplayIndex.value + 1;
+  return nextIndex < videoSets.value.length || hasMoreData.value;
+});
 
+// Pre-fetch data when approaching the end
+watch(currentDisplayIndex, (newIndex) => {
+  const totalSets = videoSets.value.length;
+  const remainingSets = totalSets - newIndex;
+
+  // Pre-fetch when we have 2 or fewer sets remaining
+  if (remainingSets <= 2 && hasMoreData.value && !isFetchingMore.value) {
+    fetchMoreVideos();
+  }
+});
+
+const hasPrevPage = computed(() => {
+  return currentDisplayIndex.value > 0;
+});
+
+// Computed: Get current videos to display
+const currentVideos = computed(() => {
+  const startIndex = currentDisplayIndex.value;
+  const endIndex = startIndex + perPage.value;
+  return allVideos.value.slice(startIndex, endIndex);
+});
+
+// Computed: Split videos into sets for slider (optimized)
+const videoSets = computed(() => {
+  if (allVideos.value.length === 0) return [];
+
+  const sets = [];
+  const pageSize = perPage.value;
+
+  for (let i = 0; i < allVideos.value.length; i += pageSize) {
+    sets.push(allVideos.value.slice(i, i + pageSize));
+  }
+
+  return sets;
+});
+
+// Video carousel composable
 const {
   activeVideoId,
-  setVideoRef,
+  setVideoRef: originalSetVideoRef,
   handlePlay,
   handleMouseEnter,
   handleMouseLeave,
@@ -166,121 +279,306 @@ const {
   pauseAllVideos,
   clearAllVideoRefs,
   videoRefs,
-} = useVideoCarousel([], videosPerPage)
+} = useVideoCarousel([], videosPerPage);
 
-// Function to check if video is currently playing
+// Use the original setVideoRef directly
+const setVideoRef = originalSetVideoRef;
+
+// ============================================================================
+// Video Control Functions
+// ============================================================================
+
+// Check if video is currently playing
 const isVideoPlaying = (videoId: number): boolean => {
-  // Use reactive state as primary source
-  const isPlaying = playingVideoIds.value.has(videoId)
+  const isPlaying = playingVideoIds.value.has(videoId);
+  const videoElement = videoRefs.value.get(videoId);
+  const elementIsPlaying = videoElement ? !videoElement.paused : false;
+  return isPlaying || elementIsPlaying;
+};
 
-  // Fallback to video element check
-  const videoElement = videoRefs.value.get(videoId)
-  const elementIsPlaying = videoElement ? !videoElement.paused : false
+// Check if video was recently clicked (for showing icons)
+const isVideoClicked = (videoId: number): boolean => {
+  return clickedVideoIds.value.has(videoId);
+};
 
-  console.log('isVideoPlaying debug:', {
-    videoId,
-    reactiveState: isPlaying,
-    elementState: elementIsPlaying,
-    hasVideoElement: !!videoElement,
-    paused: videoElement?.paused,
-    playingVideoIds: Array.from(playingVideoIds.value)
-  })
+// Show icon for a specific video
+const showIconForVideo = (videoId: number) => {
+  const existingTimer = iconTimers.value.get(videoId);
+  if (existingTimer) {
+    clearTimeout(existingTimer);
+  }
 
-  return isPlaying || elementIsPlaying
-}
+  clickedVideoIds.value.add(videoId);
 
-// Function to toggle video play/pause when button is clicked
+  const timer = setTimeout(() => {
+    clickedVideoIds.value.delete(videoId);
+    iconTimers.value.delete(videoId);
+  }, ICON_DISPLAY_DURATION);
+
+  iconTimers.value.set(videoId, timer);
+};
+
+// Toggle video play/pause when button is clicked
 const toggleVideoPlayback = (videoId: number) => {
-  const videoElement = videoRefs.value.get(videoId)
-  const isCurrentlyPlaying = playingVideoIds.value.has(videoId)
+  const videoElement = videoRefs.value.get(videoId);
+  const isCurrentlyPlaying = playingVideoIds.value.has(videoId);
 
-  console.log('toggleVideoPlayback debug:', {
-    videoId,
-    hasVideoElement: !!videoElement,
-    paused: videoElement?.paused,
-    isCurrentlyPlaying,
-    videoRefsSize: videoRefs.value.size,
-    allVideoIds: Array.from(videoRefs.value.keys())
-  })
+  if (!videoElement) {
+    console.warn("Video element not found for ID:", videoId);
+    return;
+  }
 
-  if (videoElement) {
-    if (isCurrentlyPlaying || !videoElement.paused) {
-      console.log('Pausing video:', videoId)
-      // Pause the current video
-      videoElement.pause()
-      playingVideoIds.value.delete(videoId)
-    } else {
-      console.log('Playing video:', videoId)
-      // Pause all other videos first
-      handlePlay(videoId)
-      // Clear all playing states
-      playingVideoIds.value.clear()
-      // Then play the selected video
-      videoElement.play().then(() => {
-        playingVideoIds.value.add(videoId)
-      }).catch((error) => {
-        console.warn('Error playing video:', error)
-      })
-    }
+  showIconForVideo(videoId);
+
+  if (isCurrentlyPlaying || !videoElement.paused) {
+    videoElement.pause();
+    playingVideoIds.value.delete(videoId);
   } else {
-    console.warn('Video element not found for ID:', videoId)
-  }
-}
+    // Pause all other videos first
+    handlePlay(videoId);
+    playingVideoIds.value.clear();
 
-async function getVideos() {
+    videoElement
+      .play()
+      .then(() => {
+        playingVideoIds.value.add(videoId);
+      })
+      .catch((error) => {
+        console.warn("Error playing video:", error);
+      });
+  }
+};
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+// Clear all icon timers and clicked states
+const clearAllIconStates = () => {
+  iconTimers.value.forEach((timer) => clearTimeout(timer));
+  iconTimers.value.clear();
+  clickedVideoIds.value.clear();
+};
+
+// Update videos display (for compatibility with existing API structure)
+const updateVideosDisplay = () => {
+  videos.value = {
+    ...videos.value!,
+    data: currentVideos.value,
+  };
+};
+
+// ============================================================================
+// API Functions
+// ============================================================================
+
+// Fetch initial videos (16 for desktop, 5 for mobile)
+async function getInitialVideos() {
   try {
-    isLoading.value = true
-    const response = await $fetch<VideoPostListResponse>(`${useRuntimeConfig().public.apiBase}/api/v1/video-posts?${new URLSearchParams({
-      page: currentPage.value.toString(),
-      per_page: perPage.value.toString(),
-    })}`)
+    isLoading.value = true;
+    const batchSize = isMobile.value ? 5 : 16;
 
-    videos.value = response
+    const response = await $fetch<VideoPostListResponse>(
+      `${
+        useRuntimeConfig().public.apiBase
+      }/api/v1/video-posts?${new URLSearchParams({
+        page: "1",
+        per_page: batchSize.toString(),
+      })}`
+    );
+
+    allVideos.value = response.data;
+    videos.value = {
+      data: currentVideos.value,
+      links: response.links,
+      meta: response.meta,
+    };
+
+    hasMoreData.value = response.links.next !== null;
+
+    if (autoSlideTimer === null) {
+      startAutoSlide();
+    }
   } catch (error) {
-    console.error('Error fetching videos:', error)
+    console.error("Error fetching initial videos:", error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
+
+// Fetch more videos when needed
+async function fetchMoreVideos() {
+  if (isFetchingMore.value || !hasMoreData.value) return;
+
+  try {
+    isFetchingMore.value = true;
+    const batchSize = isMobile.value ? 5 : 16;
+    const currentPage = Math.ceil(allVideos.value.length / batchSize) + 1;
+
+    const response = await $fetch<VideoPostListResponse>(
+      `${
+        useRuntimeConfig().public.apiBase
+      }/api/v1/video-posts?${new URLSearchParams({
+        page: currentPage.toString(),
+        per_page: batchSize.toString(),
+      })}`
+    );
+
+    allVideos.value.push(...response.data);
+    hasMoreData.value = response.links.next !== null;
+  } catch (error) {
+    console.error("Error fetching more videos:", error);
+  } finally {
+    isFetchingMore.value = false;
+  }
+}
+
+// ============================================================================
+// Navigation Functions
+// ============================================================================
 
 // Navigate to next page
 async function goToNext() {
-  if (hasNextPage.value && !isLoading.value) {
-    pauseAllVideos()
-    currentPage.value++
-    await getVideos()
+  if (!hasNextPage.value || isSliding.value) return;
+
+  pauseAllVideos();
+  clearAllIconStates();
+
+  isSliding.value = true;
+  isTransitioning.value = true;
+
+  const nextIndex = currentDisplayIndex.value + 1;
+
+  // Check if we need to fetch more data
+  if (nextIndex >= videoSets.value.length && hasMoreData.value) {
+    // Start fetching in background
+    fetchMoreVideos();
+
+    // Wait a bit for data to be fetched, but don't block indefinitely
+    let attempts = 0;
+    const maxAttempts = 5; // Max 500ms wait
+
+    while (
+      nextIndex >= videoSets.value.length &&
+      attempts < maxAttempts &&
+      hasMoreData.value
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
+    }
+  }
+
+  if (nextIndex < videoSets.value.length) {
+    currentDisplayIndex.value = nextIndex;
+    setTimeout(() => {
+      isSliding.value = false;
+    }, SLIDE_DURATION);
+  } else {
+    // Simple loop to first set when reaching the end
+    currentDisplayIndex.value = 0;
+    setTimeout(() => {
+      isSliding.value = false;
+    }, SLIDE_DURATION);
   }
 }
 
 // Navigate to previous page
 async function goToPrev() {
-  if (hasPrevPage.value && !isLoading.value) {
-    pauseAllVideos()
-    currentPage.value--
-    await getVideos()
+  if (!hasPrevPage.value || isSliding.value) return;
+
+  pauseAllVideos();
+  clearAllIconStates();
+
+  isSliding.value = true;
+  isTransitioning.value = true;
+
+  const prevIndex = currentDisplayIndex.value - 1;
+
+  if (prevIndex >= 0) {
+    currentDisplayIndex.value = prevIndex;
+    setTimeout(() => {
+      isSliding.value = false;
+    }, SLIDE_DURATION);
+  } else {
+    // Simple loop to last set when reaching the beginning
+    currentDisplayIndex.value = videoSets.value.length - 1;
+    setTimeout(() => {
+      isSliding.value = false;
+    }, SLIDE_DURATION);
   }
 }
 
-// Watch for mobile/desktop switch and reset to page 1
-const prevIsMobile = ref(isMobile.value)
+// ============================================================================
+// Auto Slide Functions
+// ============================================================================
+
+const startAutoSlide = () => {
+  if (videoSets.value.length <= 1) return;
+
+  stopAutoSlide();
+
+  autoSlideTimer = setInterval(() => {
+    goToNext();
+  }, AUTO_SLIDE_INTERVAL);
+};
+
+const stopAutoSlide = () => {
+  if (autoSlideTimer) {
+    clearInterval(autoSlideTimer);
+    autoSlideTimer = null;
+  }
+};
+
+// Handle manual navigation (stops auto slide)
+const handleManualNavigation = (direction: "prev" | "next") => {
+  // Prevent rapid clicks
+  if (isSliding.value) return;
+
+  stopAutoSlide();
+  if (direction === "prev") {
+    goToPrev();
+  } else {
+    goToNext();
+  }
+};
+
+// ============================================================================
+// Lifecycle & Watchers
+// ============================================================================
+
+// Watch for mobile/desktop switch and reset to index 0
+const prevIsMobile = ref(isMobile.value);
 watch(isMobile, async (newValue) => {
   if (prevIsMobile.value !== newValue) {
-    pauseAllVideos()
-    currentPage.value = 1
-    await getVideos()
-    prevIsMobile.value = newValue
+    pauseAllVideos();
+    stopAutoSlide();
+    clearAllIconStates();
+
+    currentDisplayIndex.value = 0;
+
+    const batchSize = newValue ? 5 : 16;
+    if (allVideos.value.length < batchSize && hasMoreData.value) {
+      await fetchMoreVideos();
+    }
+
+    updateVideosDisplay();
+    startAutoSlide();
+    prevIsMobile.value = newValue;
   }
-})
+});
 
 // Initial load
-onMounted(() => {
-  getVideos()
-})
+onMounted(async () => {
+  await getInitialVideos();
+  startAutoSlide();
+});
 
-// Cleanup video refs on unmount
+// Cleanup on unmount
 onUnmounted(() => {
-  clearAllVideoRefs()
-})
+  clearAllVideoRefs();
+  stopAutoSlide();
+  clearAllIconStates();
+});
 </script>
 
 <style></style>
