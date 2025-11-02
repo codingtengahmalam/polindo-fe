@@ -1,44 +1,32 @@
-# Stage 1: Install dependencies
-FROM node:20-alpine AS dependencies
+# Build Stage 1
 
+FROM node:22-alpine AS build
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache libc6-compat git python3 make g++
-
-# Copy package files
+# Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm ci --prefer-offline --no-audit
+RUN npm ci
 
-# Stage 2: Build application
-FROM dependencies AS builder
+# Copy the entire project
+COPY . ./
 
-WORKDIR /app
-
-# Copy source code
-COPY . .
-
-# Build the application with production optimizations
+# Build the project
 RUN npm run build
 
-# Stage 3: Production image
-FROM node:20-alpine AS runner
+# Build Stage 2
 
+FROM node:22-alpine
 WORKDIR /app
 
-# Copy built application
-COPY --from=builder /app/.output /app/.output
-COPY --from=builder /app/package.json /app/package.json
+# Only `.output` folder is needed from the build stage
+COPY --from=build /app/.output/ ./
 
-# Expose port
-EXPOSE 3000
-
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=3000
+# Change the port and host
+ENV PORT=8082
 ENV HOST=0.0.0.0
 
-# Start the server
-CMD ["node", ".output/server/index.mjs"]
+EXPOSE 8082
+
+CMD ["node", "/app/server/index.mjs"]
