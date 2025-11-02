@@ -5,16 +5,9 @@ services:
       dockerfile: Dockerfile
     image: polindo-fe:latest
     container_name: polindo-fe
-    ports:
-      - "8082:8082"
+    network_mode: "host"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
       - PORT=8082
       - HOST=0.0.0.0
-    networks:
-      - polindo-network
-
-networks:
-  polindo-network:
-    driver: host
