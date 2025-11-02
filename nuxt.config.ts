@@ -30,28 +30,43 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: "2025-07-15",
-  modules: [
-    "@nuxt/fonts",
-    "@nuxtjs/tailwindcss",
-    [
-      "@nuxt/image",
-      {
-        // Use IPX for SSR (production with Node.js server)
-        // IPX works with full URLs from API
-        provider: "ipx",
-        quality: 80,
-        format: ["webp"],
-        ipx: {
-          // IPX allows full URLs from external domains
-          // Domains can be set via IPX_DOMAINS env var (comma-separated)
-          // Default: "politikindonesia.id,api.politikindonesia.id"
-          domains: process.env.IPX_DOMAINS
-            ? process.env.IPX_DOMAINS.split(",").map((d) => d.trim())
-            : ["politikindonesia.id", "api.politikindonesia.id"],
-        },
+  modules: ["@nuxt/fonts", "@nuxtjs/tailwindcss", [
+    "@nuxt/image",
+    {
+      // Use IPX for SSR (production with Node.js server)
+      // IPX works with full URLs from API
+      provider: "ipx",
+      quality: 80,
+      format: ["webp"],
+      ipx: {
+        // IPX allows full URLs from external domains
+        // Domains can be set via IPX_DOMAINS env var (comma-separated)
+        // Default: "politikindonesia.id,api.politikindonesia.id"
+        domains: process.env.IPX_DOMAINS
+          ? process.env.IPX_DOMAINS.split(",").map((d) => d.trim())
+          : ["politikindonesia.id", "api.politikindonesia.id"],
       },
+    },
+  ], "nuxt-gtag"],
+
+  // Google Tag configuration (GA4 & Ads)
+  gtag: {
+    id: process.env.NUXT_PUBLIC_GTAG_ID || "G-8L8HDXF7VJ",
+    initCommands: [
+      // Set up consent mode for GDPR compliance
+      [
+        "consent",
+        "default",
+        {
+          ad_user_data: "denied",
+          ad_personalization: "denied",
+          ad_storage: "denied",
+          analytics_storage: "denied",
+          wait_for_update: 500,
+        },
+      ],
     ],
-  ],
+  },
 
   fonts: {
     families: [
