@@ -6,8 +6,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (use npm ci for faster, more reliable CI builds)
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --prefer-offline --no-audit
 
 # Copy the entire project
 COPY . ./
