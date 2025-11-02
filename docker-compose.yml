@@ -17,4 +17,4 @@ services:
 
 networks:
   polindo-network:
-    driver: bridge
+    driver: host
