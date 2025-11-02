@@ -15,7 +15,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.API_BASE || "https://api.politikindonesia.id",
-      dashboardUrl: process.env.DASHBOARD_URL || "#",
+      dashboardUrl: process.env.DASHBOARD_URL || "https://dashboard.politikindonesia.id",
     },
   },
 
