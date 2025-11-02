@@ -14,7 +14,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: "https://api.politikindonesia.id",
+      apiBase: process.env.API_BASE || "https://api.politikindonesia.id",
+      dashboardUrl: process.env.DASHBOARD_URL || "#",
     },
   },
 
@@ -42,7 +43,11 @@ export default defineNuxtConfig({
         format: ["webp"],
         ipx: {
           // IPX allows full URLs from external domains
-          domains: ["politikindonesia.id", "api.politikindonesia.id"],
+          // Domains can be set via IPX_DOMAINS env var (comma-separated)
+          // Default: "politikindonesia.id,api.politikindonesia.id"
+          domains: process.env.IPX_DOMAINS
+            ? process.env.IPX_DOMAINS.split(",").map((d) => d.trim())
+            : ["politikindonesia.id", "api.politikindonesia.id"],
         },
       },
     ],

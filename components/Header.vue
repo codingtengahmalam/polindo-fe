@@ -55,7 +55,7 @@
           >
             <IconSearch />
           </NuxtLink>
-          <a href="#" target="_blank">
+          <a :href="config.public.dashboardUrl" target="_blank" rel="noopener noreferrer">
             <IconUserCircle class="transition-colors text-white hover:text-brand-600 size-6" />
           </a>
           </div>
@@ -134,9 +134,10 @@ const BACKDROP_Z_INDEX = "z-30";
 
 // Composables
 const route = useRoute();
+const config = useRuntimeConfig();
 
 const { data: categories, error } = await useFetch<CategoryListResponse>(
-  `${useRuntimeConfig().public.apiBase}/api/v1/categories?show_on_menu=true`,
+  `${config.public.apiBase}/api/v1/categories?show_on_menu=true`,
   {
     headers: {
       "User-Agent": "PolitikIndonesia/1.0",
