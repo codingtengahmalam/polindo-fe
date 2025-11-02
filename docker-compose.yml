@@ -8,8 +8,12 @@ services:
     network_mode: "host"
     restart: unless-stopped
     environment:
-      - NODE_ENV=production
-      - PORT=8082
-      - HOST=0.0.0.0
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-8082}
+      - HOST=${HOST:-0.0.0.0}
+      - DASHBOARD_URL=${DASHBOARD_URL}
+      - API_BASE=${API_BASE}
+      - IPX_DOMAINS=${IPX_DOMAINS}
+      - NUXT_PUBLIC_GTAG_ID=${NUXT_PUBLIC_GTAG_ID}
     volumes:
       - ./public/ads.txt:/app/public/ads.txt:ro
