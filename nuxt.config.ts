@@ -9,6 +9,13 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: "id",
       },
+      script: [
+        {
+          src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1253170951120275',
+          async: true,
+          crossorigin: "anonymous",
+        },
+      ],  
     },
   },
 
@@ -52,20 +59,6 @@ export default defineNuxtConfig({
   // Google Tag configuration (GA4 & Ads)
   gtag: {
     id: process.env.NUXT_PUBLIC_GTAG_ID || "G-8L8HDXF7VJ",
-    initCommands: [
-      // Set up consent mode for GDPR compliance
-      [
-        "consent",
-        "default",
-        {
-          ad_user_data: "denied",
-          ad_personalization: "denied",
-          ad_storage: "denied",
-          analytics_storage: "denied",
-          wait_for_update: 500,
-        },
-      ],
-    ],
   },
 
   fonts: {
