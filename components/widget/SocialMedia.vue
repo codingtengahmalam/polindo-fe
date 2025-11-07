@@ -33,11 +33,10 @@
 </template>
 
 <script lang="ts" setup>
-import FacebookIcon from "~/assets/social-media/ri_facebook-fill.png";
-import InstagramIcon from "~/assets/social-media/uil_instagram.png";
-import TiktokIcon from "~/assets/social-media/ic_baseline-tiktok.png";
-import YoutubeIcon from "~/assets/social-media/mdi_youtube.png";
-import RSSIcon from "~/assets/social-media/ri_rss-fill.png";
+import FacebookIcon from "~/assets/social-media-ori/fb.png";
+import TiktokIcon from "~/assets/social-media-ori/tiktok.png";
+import YoutubeIcon from "~/assets/social-media-ori/yt.png";
+import InstagramIcon from "~/assets/social-media-ori/ig.png";
 
 // Types
 interface SocialMediaLink {
@@ -67,11 +66,6 @@ const SOCIAL_MEDIA: readonly SocialMediaLink[] = [
     name: "YouTube",
     icon: YoutubeIcon,
     url: "https://www.youtube.com/@politikindonesia-id",
-  },
-  {
-    name: "RSS Feed",
-    icon: RSSIcon,
-    url: "/rss",
-  },
+  }
 ] as const;
 </script>
