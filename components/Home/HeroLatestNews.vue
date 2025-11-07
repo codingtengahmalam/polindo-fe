@@ -72,6 +72,14 @@
         </NuxtLink>
       </article>
     </div>
+
+      <NuxtLink
+      to="/article/terbaru"
+      class="text-brand-800 uppercase text-sm font-normal flex items-center gap-2 hover:text-brand-700 transition-colors w-full text-center "
+      >
+        BERITA TERBARU LAINNYA
+        <IconArrowRight aria-hidden="true" />
+      </NuxtLink>
   </div>
 </template>
 
