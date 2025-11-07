@@ -122,9 +122,11 @@
       </section>
 
       <!-- Sidebar -->
-      <aside class="w-full pl-0 xl:pl-4 space-y-10 sticky top-32 self-start">
+      <aside class="w-full pl-0 xl:pl-4 space-y-10  top-32 self-start">
         <!-- <WidgetUpcomingEvent /> -->
         <WidgetLatestNews type="popular" />
+
+        <WidgetSocialMedia />
       </aside>
     </div>
 
@@ -142,6 +144,7 @@
         />
       </div>
     </section>
+
   </ContentContainer>
 </template>
 
@@ -152,6 +155,8 @@ import type {
   ArticleListResponse,
   ArticleTag,
 } from "~/types";
+import WidgetSocialMedia from "~/components/widget/SocialMedia.vue";
+
 
 // Composables
 const route = useRoute();

@@ -351,7 +351,7 @@
       </div>
       <!-- Col 2 as Aside -->
       <aside
-        class="w-full md:w-[250px] shrink-0 sticky top-32 self-start space-y-6"
+        class="w-full md:w-[250px] shrink-0  top-32 self-start space-y-6"
       >
         <div class="w-full border bg-white rounded-lg p-4 text-title">
           <h5 class="text-lg font-semibold">Kata Kunci</h5>
@@ -393,8 +393,11 @@
               <IconCircleCheck class="size-3 shrink-0" />
               {{ tag.tag }}
             </NuxtLink>
+
           </div>
+
         </div>
+        <WidgetSocialMedia />
       </aside>
     </div>
   </ContentContainer>
@@ -419,7 +422,7 @@ const articlesLatest = ref<Article[]>([]);
 const otherArticles = ref<Article[]>([]);
 const tags = ref<Tag[]>([]);
 const page = ref(1);
-const perPage = ref(15);
+const perPage = ref(9);
 const isLoading = ref(true);
 const initialLoading = ref(true);
 const links = ref<PaginationLinks>();
@@ -466,9 +469,9 @@ async function fetchLatestArticles() {
         query: {
           category_id: category?.value?.data?.id,
           page: 1,
-          per_page: 3,
           date_from: startDate,
           date_to: endDate,
+          per_page: 6,
         },
       }
     );
