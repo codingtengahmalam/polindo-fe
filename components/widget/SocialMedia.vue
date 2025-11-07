@@ -25,7 +25,7 @@
           :alt="`${socialMedia.name} icon`"
           width="24"
           height="24"
-          class="h-6 w-6 [filter:brightness(0)]"
+          class="h-6 w-6"
         />
       </a>
     </nav>
