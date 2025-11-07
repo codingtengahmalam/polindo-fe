@@ -7,6 +7,7 @@
       <section class="w-full pl-0 lg:pl-5 space-y-10">
         <!-- <WidgetUpcomingEvent /> -->
         <WidgetLatestNews type="popular" />
+        <WidgetSocialMedia />
       </section>
     </div>
   </ContentContainer>
@@ -16,7 +17,7 @@
 
 <script lang="ts" setup>
 import HeroLatestNews from '~/components/Home/HeroLatestNews.vue';
-
+import WidgetSocialMedia from '~/components/widget/SocialMedia.vue';
 </script>
 
 <style></style>
