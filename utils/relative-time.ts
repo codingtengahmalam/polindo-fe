@@ -18,7 +18,7 @@ export default (time: string) => {
   const month = timestamp.toLocaleDateString("en-US", { month: "short" });
   const year = timestamp.getFullYear();
   const hours = timestamp.getHours().toString().padStart(2, "0");
-  const minutes = timestamp.getMin  utes().toString().padStart(2, "0");
+  const minutes = timestamp.getMinutes().toString().padStart(2, "0");
 
   return `${day} ${month} ${year}, ${hours}:${minutes}`;
 }
