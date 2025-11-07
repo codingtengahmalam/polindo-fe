@@ -215,13 +215,13 @@
       <div class="flex-1 space-y-6">
         <!-- Berita Terbaru -->
         <div class="space-y-5">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-2">
             <h2
-            class="text-title text-2xl font-bold border-l-4 border-brand-600 pl-2"
-          >
-            Berita
-            {{ normalizeTextCapitalize(category?.data?.name || "") }} Terbaru
-          </h2>
+              class="text-title text-2xl font-bold border-l-4 border-brand-600 pl-2"
+            >
+              Berita
+              {{ normalizeTextCapitalize(category?.data?.name || "") }} Terbaru
+            </h2>
             <div class="w-[250px]">
               <VueDatePicker
                 v-model="dateFilter"
@@ -350,9 +350,7 @@
         </div>
       </div>
       <!-- Col 2 as Aside -->
-      <aside
-        class="w-full md:w-[250px] shrink-0  top-32 self-start space-y-6"
-      >
+      <aside class="w-full md:w-[250px] shrink-0 top-32 self-start space-y-6">
         <div class="w-full border bg-white rounded-lg p-4 text-title">
           <h5 class="text-lg font-semibold">Kata Kunci</h5>
           <span class="text-subtitle text-sm">
@@ -393,9 +391,7 @@
               <IconCircleCheck class="size-3 shrink-0" />
               {{ tag.tag }}
             </NuxtLink>
-
           </div>
-
         </div>
         <WidgetSocialMedia />
       </aside>
@@ -461,8 +457,12 @@ async function fetchArticlePopular() {
 async function fetchLatestArticles() {
   try {
     initialLoading.value = true;
-    const startDate = dateFilter.value?.[0] ? formatDateOnly(dateFilter.value?.[0]) : null;
-    const endDate = dateFilter.value?.[1] ? formatDateOnly(dateFilter.value?.[1]) : null;
+    const startDate = dateFilter.value?.[0]
+      ? formatDateOnly(dateFilter.value?.[0])
+      : null;
+    const endDate = dateFilter.value?.[1]
+      ? formatDateOnly(dateFilter.value?.[1])
+      : null;
     const response = await $fetch<ArticleListResponse>(
       `${useRuntimeConfig().public.apiBase}/api/v1/posts`,
       {
@@ -486,8 +486,12 @@ async function fetchLatestArticles() {
 async function fetchOtherArticles(initial = false) {
   try {
     isLoading.value = true;
-    const startDate = dateFilter.value?.[0] ? formatDateOnly(dateFilter.value?.[0]) : null;
-    const endDate = dateFilter.value?.[1] ? formatDateOnly(dateFilter.value?.[1]) : null;
+    const startDate = dateFilter.value?.[0]
+      ? formatDateOnly(dateFilter.value?.[0])
+      : null;
+    const endDate = dateFilter.value?.[1]
+      ? formatDateOnly(dateFilter.value?.[1])
+      : null;
     const response = await $fetch<ArticleListResponse>(
       `${useRuntimeConfig().public.apiBase}/api/v1/posts`,
       {

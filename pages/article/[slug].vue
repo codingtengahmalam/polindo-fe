@@ -1,6 +1,6 @@
 <template>
   <ContentContainer class="space-y-7 my-10">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-2">
       <h1
         class="text-title text-4xl font-bold flex flex-col md:flex-row items-start md:items-end gap-2"
       >
