@@ -89,7 +89,7 @@ onMounted(async () => {
     const config = useRuntimeConfig();
     const endpoint = props.type === 'latest'
       ? `${config.public.apiBase}/api/v1/posts?per_page=8`
-      : `${config.public.apiBase}/api/v1/posts/popular?limit=6`;
+      : `${config.public.apiBase}/api/v1/posts/popular?limit=5`;
 
     articles.value = await $fetch<ArticleListResponse>(endpoint);
   } catch (error) {
