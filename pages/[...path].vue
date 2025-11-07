@@ -11,29 +11,6 @@
           class="space-y-8"
         >
           <!-- Featured Image with Figure -->
-          <figure
-            itemprop="image"
-            itemscope
-            itemtype="https://schema.org/ImageObject"
-          >
-            <NuxtImg
-              :src="data?.images?.big || ''"
-              :alt="data?.title || ''"
-              width="720"
-              height="400"
-              sizes="sm:100vw md:720px"
-              class="w-full max-h-[500px] object-cover rounded-lg"
-              loading="eager"
-              fetchpriority="high"
-              itemprop="url contentUrl"
-            />
-            <figcaption class="text-subtitle font-normal text-sm mt-2">
-              {{ data?.images?.description }}
-            </figcaption>
-            <!-- Hidden meta for schema.org -->
-            <meta itemprop="width" content="720" />
-            <meta itemprop="height" content="400" />
-          </figure>
 
           <!-- Article Header -->
           <header class="space-y-2">
@@ -66,6 +43,30 @@
               />
             </div>
           </header>
+
+          <figure
+            itemprop="image"
+            itemscope
+            itemtype="https://schema.org/ImageObject"
+          >
+            <NuxtImg
+              :src="data?.images?.big || ''"
+              :alt="data?.title || ''"
+              width="720"
+              height="400"
+              sizes="sm:100vw md:720px"
+              class="w-full max-h-[500px] object-cover rounded-lg"
+              loading="eager"
+              fetchpriority="high"
+              itemprop="url contentUrl"
+            />
+            <figcaption class="text-subtitle font-normal text-sm mt-2">
+              {{ data?.images?.description }}
+            </figcaption>
+            <!-- Hidden meta for schema.org -->
+            <meta itemprop="width" content="720" />
+            <meta itemprop="height" content="400" />
+          </figure>
 
           <!-- Article Body -->
           <section
