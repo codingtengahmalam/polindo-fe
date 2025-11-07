@@ -215,12 +215,25 @@
       <div class="flex-1 space-y-6">
         <!-- Berita Terbaru -->
         <div class="space-y-5">
-          <h2
+          <div class="flex items-center justify-between">
+            <h2
             class="text-title text-2xl font-bold border-l-4 border-brand-600 pl-2"
           >
             Berita
             {{ normalizeTextCapitalize(category?.data?.name || "") }} Terbaru
           </h2>
+            <div class="w-[250px]">
+              <VueDatePicker
+                v-model="dateFilter"
+                placeholder="Filter"
+                range
+                :formats="{ input: 'dd/MM/yyyy' }"
+                :time-config="{ enableTimePicker: false }"
+                @update:model-value="handleDateChange"
+                @cleared="handleDateClear"
+              />
+            </div>
+          </div>
 
           <!-- Skeleton Berita Terbaru -->
           <div
@@ -388,6 +401,8 @@
 </template>
 
 <script lang="ts" setup>
+import { VueDatePicker } from "@vuepic/vue-datepicker";
+
 import type {
   Article,
   ArticleListResponse,
@@ -408,6 +423,7 @@ const perPage = ref(15);
 const isLoading = ref(true);
 const initialLoading = ref(true);
 const links = ref<PaginationLinks>();
+const dateFilter = ref();
 
 const { data: category, status } = await useFetch<CategoryDetailResponse>(
   `${useRuntimeConfig().public.apiBase}/api/v1/categories/${slug}`,
@@ -442,6 +458,8 @@ async function fetchArticlePopular() {
 async function fetchLatestArticles() {
   try {
     initialLoading.value = true;
+    const startDate = dateFilter.value?.[0] ? formatDateOnly(dateFilter.value?.[0]) : null;
+    const endDate = dateFilter.value?.[1] ? formatDateOnly(dateFilter.value?.[1]) : null;
     const response = await $fetch<ArticleListResponse>(
       `${useRuntimeConfig().public.apiBase}/api/v1/posts`,
       {
@@ -449,6 +467,8 @@ async function fetchLatestArticles() {
           category_id: category?.value?.data?.id,
           page: 1,
           per_page: 3,
+          date_from: startDate,
+          date_to: endDate,
         },
       }
     );
@@ -463,6 +483,8 @@ async function fetchLatestArticles() {
 async function fetchOtherArticles(initial = false) {
   try {
     isLoading.value = true;
+    const startDate = dateFilter.value?.[0] ? formatDateOnly(dateFilter.value?.[0]) : null;
+    const endDate = dateFilter.value?.[1] ? formatDateOnly(dateFilter.value?.[1]) : null;
     const response = await $fetch<ArticleListResponse>(
       `${useRuntimeConfig().public.apiBase}/api/v1/posts`,
       {
@@ -470,6 +492,8 @@ async function fetchOtherArticles(initial = false) {
           category_id: category?.value?.data?.id,
           page: page.value,
           per_page: perPage.value,
+          date_from: startDate,
+          date_to: endDate,
         },
       }
     );
@@ -529,6 +553,33 @@ const tertiaryArticlePopular = computed(() => {
 
   return grouped;
 });
+
+async function handleDateChange(value: Date | Date[] | null) {
+  if (!value || !Array.isArray(value) || value.length !== 2) {
+    return;
+  }
+
+  // reset
+  page.value = 1;
+  articlesLatest.value = [];
+  otherArticles.value = [];
+  links.value = undefined;
+
+  await fetchLatestArticles();
+  await fetchOtherArticles(true);
+}
+
+async function handleDateClear() {
+  // reset
+  page.value = 1;
+  articlesLatest.value = [];
+  otherArticles.value = [];
+  links.value = undefined;
+  dateFilter.value = null;
+
+  await fetchLatestArticles();
+  await fetchOtherArticles(true);
+}
 
 useHead({
   title: `${category.value?.data?.name ?? "Kategori Berita"}`,

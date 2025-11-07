@@ -1,13 +1,29 @@
 <template>
   <ContentContainer class="space-y-7 my-10">
-    <h1
-      class="text-title text-4xl font-bold flex flex-col md:flex-row items-start md:items-end gap-2"
-    >
-      Berita {{ slug === "populer" ? "Populer" : "Terbaru" }}
-    </h1>
+    <div class="flex items-center justify-between">
+      <h1
+        class="text-title text-4xl font-bold flex flex-col md:flex-row items-start md:items-end gap-2"
+      >
+        Berita {{ slug === "populer" ? "Populer" : "Terbaru" }}
+      </h1>
+
+      <div v-if="slug === 'terbaru'" class="w-[250px]">
+        <VueDatePicker
+          v-model="dateFilter"
+          placeholder="Filter"
+          range
+          :formats="{ input: 'dd/MM/yyyy' }"
+          :time-config="{ enableTimePicker: false }"
+          @update:model-value="handleDateChange"
+          @cleared="handleDateClear"
+        />
+          <!-- :range="{ partialRange: false }" -->
+      </div>
+    </div>
 
     <div class="space-y-5">
       <div
+        v-if="articles.length > 0"
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
       >
         <ArticleCard
@@ -17,6 +33,12 @@
           :article="article"
           class="grid-article-divider"
         />
+      </div>
+
+      <div v-else-if="!isLoading && articles.length === 0">
+        <div class="text-subtitle text-center py-10">
+          <p>Belum ada berita yang terkait.</p>
+        </div>
       </div>
 
       <div v-if="isLoading">
@@ -66,7 +88,9 @@
 </template>
 
 <script lang="ts" setup>
+import { VueDatePicker } from "@vuepic/vue-datepicker";
 import type { Article, ArticleListResponse, PaginationLinks } from "~/types";
+import { formatDateOnly } from "~/utils/date-format";
 
 const route = useRoute();
 
@@ -76,6 +100,7 @@ const page = ref(1);
 const perPage = ref(15);
 const isLoading = ref(true);
 const links = ref<PaginationLinks>();
+const dateFilter = ref();
 
 // validate slug value
 if (slug !== "populer" && slug !== "terbaru") {
@@ -112,12 +137,18 @@ async function fetchArticlePopular() {
 async function fetchArticles() {
   try {
     isLoading.value = true;
+
+    const startDate = dateFilter.value?.[0] ? formatDateOnly(dateFilter.value?.[0]) : null;
+    const endDate = dateFilter.value?.[1] ? formatDateOnly(dateFilter.value?.[1]) : null;
+
     const response = await $fetch<ArticleListResponse>(
       `${useRuntimeConfig().public.apiBase}/api/v1/posts`,
       {
         query: {
           page: page.value,
           per_page: perPage.value,
+          date_from: startDate,
+          date_to: endDate,
         },
       }
     );
@@ -130,6 +161,29 @@ async function fetchArticles() {
   } finally {
     isLoading.value = false;
   }
+}
+
+async function handleDateChange(value: Date | Date[] | null) {
+  if (!value || !Array.isArray(value) || value.length !== 2) {
+    return;
+  }
+
+  // reset
+  page.value = 1;
+  articles.value = [];
+  links.value = undefined;
+
+  await fetchArticles()
+}
+
+async function handleDateClear() {
+  // reset
+  page.value = 1;
+  articles.value = [];
+  links.value = undefined;
+  dateFilter.value = null;
+
+  await fetchArticles()
 }
 
 const hasNextPage = computed(() => {
@@ -161,5 +215,3 @@ onMounted(async () => {
   }
 });
 </script>
-
-<style></style>
