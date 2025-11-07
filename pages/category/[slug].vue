@@ -277,6 +277,24 @@
           </h2>
 
           <div
+            v-if="!initialLoading && otherArticles.length > 0"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
+          >
+            <ArticleCard
+              v-for="article in otherArticles"
+              :key="article.id"
+              :article="article"
+              :with-category="false"
+              img-height="h-40"
+              class="grid-article-divider"
+            />
+          </div>
+
+          <div v-else class="text-subtitle text-center py-10">
+            <p>Belum ada berita untuk kategori ini.</p>
+          </div>
+
+          <div
             v-if="isLoading"
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
           >
@@ -304,23 +322,6 @@
                 </div>
               </div>
             </div>
-          </div>
-          <div
-            v-else-if="!initialLoading && otherArticles.length > 0"
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
-          >
-            <ArticleCard
-              v-for="article in otherArticles"
-              :key="article.id"
-              :article="article"
-              :with-category="false"
-              img-height="h-40"
-              class="grid-article-divider"
-            />
-          </div>
-
-          <div v-else class="text-subtitle text-center py-10">
-            <p>Belum ada berita untuk kategori ini.</p>
           </div>
 
           <hr class="border-grayscale-10" />
