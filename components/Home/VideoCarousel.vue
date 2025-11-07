@@ -376,7 +376,7 @@ const updateVideosDisplay = () => {
 async function getInitialVideos() {
   try {
     isLoading.value = true;
-    const batchSize = isMobile.value ? 5 : 16;
+    const batchSize = isMobile.value ? 5 : 8;
 
     const response = await $fetch<VideoPostListResponse>(
       `${
