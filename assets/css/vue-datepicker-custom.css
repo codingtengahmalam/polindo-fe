@@ -1,0 +1,118 @@
+/* VueDatePicker Custom Styling - Match with app design system */
+/* This file must be loaded AFTER @vuepic/vue-datepicker/dist/main.css */
+
+.dp__menu {
+  border: 1px solid #b4b4b4 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  background-color: #ffffff !important;
+}
+
+/* Calendar header (month/year) */
+.dp__calendar_header_item {
+  color: #202223 !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+}
+
+/* Calendar cell (dates) */
+.dp__cell_inner {
+  color: #202223 !important;
+}
+
+/* Hover state for dates */
+.dp__cell_inner:hover {
+  background-color: #ededed !important;
+}
+
+/* Selected date (single) */
+.dp__active_date {
+  background-color: #e32528 !important;
+  color: #ffffff !important;
+}
+
+.dp__active_date:hover {
+  background-color: #be171a !important;
+}
+
+/* Range selection - start and end dates */
+.dp__range_start,
+.dp__range_end {
+  background-color: #e32528 !important;
+  color: #ffffff !important;
+}
+
+.dp__range_start:hover,
+.dp__range_end:hover {
+  background-color: #be171a !important;
+}
+
+/* Range selection - dates between start and end */
+.dp__range_between {
+  background-color: #fef2f2 !important;
+  color: #e32528 !important;
+}
+
+/* Today's date */
+.dp__today {
+  border: 2px solid #e3898b !important;
+}
+
+/* Disabled dates */
+.dp__cell_disabled {
+  color: #b4b4b4 !important;
+  opacity: 0.5 !important;
+}
+
+/* Month/Year selector buttons */
+.dp__inner_nav {
+  color: #202223 !important;
+}
+
+.dp__inner_nav:hover {
+  background-color: #ededed !important;
+  color: #e32528 !important;
+}
+
+/* Action buttons (Clear, Cancel, Select) */
+.dp__action_button {
+  color: #202223 !important;
+  border: 1px solid #b4b4b4 !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.2s !important;
+}
+
+.dp__action_button:hover {
+  background-color: #ededed !important;
+}
+
+.dp__action_select {
+  background-color: #e32528 !important;
+  color: #ffffff !important;
+  border: 1px solid #e32528 !important;
+}
+
+.dp__action_select:hover {
+  background-color: #be171a !important;
+}
+
+/* Disabled state for Select button */
+.dp__action_select:disabled,
+.dp__action_select[disabled] {
+  background-color: #b4b4b4 !important;
+  color: #696969 !important;
+  border-color: #b4b4b4 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
+.dp__action_select:disabled:hover,
+.dp__action_select[disabled]:hover {
+  background-color: #b4b4b4 !important;
+}
+
+/* Calendar footer */
+.dp__calendar_footer {
+  border-top: 1px solid #ededed !important;
+}

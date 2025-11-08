@@ -215,12 +215,25 @@
       <div class="flex-1 space-y-6">
         <!-- Berita Terbaru -->
         <div class="space-y-5">
-          <h2
-            class="text-title text-2xl font-bold border-l-4 border-brand-600 pl-2"
-          >
-            Berita
-            {{ normalizeTextCapitalize(category?.data?.name || "") }} Terbaru
-          </h2>
+          <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-2">
+            <h2
+              class="text-title text-2xl font-bold border-l-4 border-brand-600 pl-2"
+            >
+              Berita
+              {{ normalizeTextCapitalize(category?.data?.name || "") }} Terbaru
+            </h2>
+            <div class="w-[250px]">
+              <VueDatePicker
+                v-model="dateFilter"
+                placeholder="Filter"
+                range
+                :formats="{ input: 'dd/MM/yyyy' }"
+                :time-config="{ enableTimePicker: false }"
+                @update:model-value="handleDateChange"
+                @cleared="handleDateClear"
+              />
+            </div>
+          </div>
 
           <!-- Skeleton Berita Terbaru -->
           <div
@@ -277,6 +290,24 @@
           </h2>
 
           <div
+            v-if="!initialLoading && otherArticles.length > 0"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
+          >
+            <ArticleCard
+              v-for="article in otherArticles"
+              :key="article.id"
+              :article="article"
+              :with-category="false"
+              img-height="h-40"
+              class="grid-article-divider"
+            />
+          </div>
+
+          <div v-else class="text-subtitle text-center py-10">
+            <p>Belum ada berita untuk kategori ini.</p>
+          </div>
+
+          <div
             v-if="isLoading"
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
           >
@@ -305,23 +336,6 @@
               </div>
             </div>
           </div>
-          <div
-            v-else-if="!initialLoading && otherArticles.length > 0"
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
-          >
-            <ArticleCard
-              v-for="article in otherArticles"
-              :key="article.id"
-              :article="article"
-              :with-category="false"
-              img-height="h-40"
-              class="grid-article-divider"
-            />
-          </div>
-
-          <div v-else class="text-subtitle text-center py-10">
-            <p>Belum ada berita untuk kategori ini.</p>
-          </div>
 
           <hr class="border-grayscale-10" />
 
@@ -336,9 +350,7 @@
         </div>
       </div>
       <!-- Col 2 as Aside -->
-      <aside
-        class="w-full md:w-[250px] shrink-0  top-32 self-start space-y-6"
-      >
+      <aside class="w-full md:w-[250px] shrink-0 top-32 self-start space-y-6">
         <div class="w-full border bg-white rounded-lg p-4 text-title">
           <h5 class="text-lg font-semibold">Kata Kunci</h5>
           <span class="text-subtitle text-sm">
@@ -379,9 +391,7 @@
               <IconCircleCheck class="size-3 shrink-0" />
               {{ tag.tag }}
             </NuxtLink>
-
           </div>
-
         </div>
         <WidgetSocialMedia />
       </aside>
@@ -390,6 +400,8 @@
 </template>
 
 <script lang="ts" setup>
+import { VueDatePicker } from "@vuepic/vue-datepicker";
+
 import type {
   Article,
   ArticleListResponse,
@@ -410,6 +422,7 @@ const perPage = ref(9);
 const isLoading = ref(true);
 const initialLoading = ref(true);
 const links = ref<PaginationLinks>();
+const dateFilter = ref();
 
 const { data: category, status } = await useFetch<CategoryDetailResponse>(
   `${useRuntimeConfig().public.apiBase}/api/v1/categories/${slug}`,
@@ -444,12 +457,20 @@ async function fetchArticlePopular() {
 async function fetchLatestArticles() {
   try {
     initialLoading.value = true;
+    const startDate = dateFilter.value?.[0]
+      ? formatDateOnly(dateFilter.value?.[0])
+      : null;
+    const endDate = dateFilter.value?.[1]
+      ? formatDateOnly(dateFilter.value?.[1])
+      : null;
     const response = await $fetch<ArticleListResponse>(
       `${useRuntimeConfig().public.apiBase}/api/v1/posts`,
       {
         query: {
           category_id: category?.value?.data?.id,
           page: 1,
+          date_from: startDate,
+          date_to: endDate,
           per_page: 6,
         },
       }
@@ -465,6 +486,12 @@ async function fetchLatestArticles() {
 async function fetchOtherArticles(initial = false) {
   try {
     isLoading.value = true;
+    const startDate = dateFilter.value?.[0]
+      ? formatDateOnly(dateFilter.value?.[0])
+      : null;
+    const endDate = dateFilter.value?.[1]
+      ? formatDateOnly(dateFilter.value?.[1])
+      : null;
     const response = await $fetch<ArticleListResponse>(
       `${useRuntimeConfig().public.apiBase}/api/v1/posts`,
       {
@@ -472,6 +499,8 @@ async function fetchOtherArticles(initial = false) {
           category_id: category?.value?.data?.id,
           page: page.value,
           per_page: perPage.value,
+          date_from: startDate,
+          date_to: endDate,
         },
       }
     );
@@ -531,6 +560,33 @@ const tertiaryArticlePopular = computed(() => {
 
   return grouped;
 });
+
+async function handleDateChange(value: Date | Date[] | null) {
+  if (!value || !Array.isArray(value) || value.length !== 2) {
+    return;
+  }
+
+  // reset
+  page.value = 1;
+  articlesLatest.value = [];
+  otherArticles.value = [];
+  links.value = undefined;
+
+  await fetchLatestArticles();
+  await fetchOtherArticles(true);
+}
+
+async function handleDateClear() {
+  // reset
+  page.value = 1;
+  articlesLatest.value = [];
+  otherArticles.value = [];
+  links.value = undefined;
+  dateFilter.value = null;
+
+  await fetchLatestArticles();
+  await fetchOtherArticles(true);
+}
 
 useHead({
   title: `${category.value?.data?.name ?? "Kategori Berita"}`,

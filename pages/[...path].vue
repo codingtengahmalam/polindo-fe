@@ -21,26 +21,31 @@
               {{ data?.title }}
             </h1>
 
-            <!-- Author & Category & Date -->
-            <div class="flex items-center gap-2 text-xs">
-              <Author
-                :id="data?.author?.id || 0"
-                :name="data?.author?.display_name || ''"
-                :slug="data?.author?.slug || ''"
-                itemprop="author"
-              />
-              <span class="text-grayscale-40">•</span>
-              <time
-                :datetime="data?.created_at"
-                itemprop="datePublished"
-                class="text-subtitle font-normal"
-              >
-                {{ relativeTime(data?.created_at || "") }}
-              </time>
-              <CategoryBadge
-                :name="data?.category?.name || ''"
-                :slug="data?.category?.slug || ''"
-              />
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+              <!-- Author & Category & Date -->
+              <div class="flex items-center gap-2 text-xs">
+                <Author
+                  :id="data?.author?.id || 0"
+                  :name="data?.author?.display_name || ''"
+                  :slug="data?.author?.slug || ''"
+                  itemprop="author"
+                />
+                <span class="text-grayscale-40">•</span>
+                <time
+                  :datetime="data?.created_at"
+                  itemprop="datePublished"
+                  class="text-subtitle font-normal"
+                >
+                  {{ relativeTime(data?.created_at || "") }}
+                </time>
+                <CategoryBadge
+                  :name="data?.category?.name || ''"
+                  :slug="data?.category?.slug || ''"
+                />
+              </div>
+
+              <!-- Shared Article -->
+              <SharedArticle :article_url="articleUrl" />
             </div>
           </header>
 
@@ -122,7 +127,7 @@
       </section>
 
       <!-- Sidebar -->
-      <aside class="w-full pl-0 xl:pl-4 space-y-10  top-32 self-start">
+      <aside class="w-full pl-0 xl:pl-4 space-y-10 top-32 self-start">
         <!-- <WidgetUpcomingEvent /> -->
         <WidgetLatestNews type="popular" />
 
@@ -144,19 +149,19 @@
         />
       </div>
     </section>
-
   </ContentContainer>
 </template>
 
 <script lang="ts" setup>
+import WidgetSocialMedia from "~/components/widget/SocialMedia.vue";
+import SharedArticle from "~/components/SharedArticle.vue";
+
 import type {
   Article,
   ArticleDetailResponse,
   ArticleListResponse,
   ArticleTag,
 } from "~/types";
-import WidgetSocialMedia from "~/components/widget/SocialMedia.vue";
-
 
 // Composables
 const route = useRoute();
@@ -222,11 +227,9 @@ const renderedContent = computed(() =>
   renderContent(data.value?.content || "")
 );
 
-// Extract plain text for meta description
-const plainTextContent = computed(() => {
-  const plain = extractPlainText(data.value?.content || "");
-  return plain.substring(0, 160); // Limit to 160 chars for meta description
-});
+const { baseUrl } = useBaseUrl();
+
+const articleUrl = computed(() => `${baseUrl}/${data.value?.title_slug}`);
 
 async function fetchRelatedArticles() {
   try {
@@ -261,8 +264,6 @@ useHead({
     },
   ],
 });
-
-const { baseUrl } = useBaseUrl();
 
 useSeoMeta({
   title: `${data?.value?.title}`,
