@@ -140,7 +140,7 @@
       <aside class="w-full pl-0 xl:pl-4 space-y-10 top-32 self-start">
         <!-- <WidgetUpcomingEvent /> -->
         <WidgetLatestNews type="popular" />
-
+        <WidgetSidebarAds />
         <WidgetSocialMedia />
       </aside>
     </div>

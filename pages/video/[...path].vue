@@ -10,7 +10,36 @@
           itemtype="https://schema.org/BlogPosting"
           class="space-y-8"
         >
-          <figure class="space-y-2">
+
+
+          <!-- Article Header -->
+          <header class="space-y-2">
+            <h1
+              itemprop="headline"
+              class="text-title text-2xl font-playfair font-bold"
+            >
+              {{ data?.title }}
+            </h1>
+
+            <!-- Author & Category & Date -->
+            <div class="flex items-center gap-2 text-xs">
+              <Author
+                :id="data?.user?.id || 0"
+                :name="data?.user?.display_name || ''"
+                :slug="data?.user?.slug || ''"
+                itemprop="author"
+              />
+              <span class="text-grayscale-40">•</span>
+              <time
+                :datetime="data?.created_at"
+                itemprop="datePublished"
+                class="text-subtitle font-normal"
+              >
+                {{ relativeTime(data?.created_at || "") }}
+              </time>
+            </div>
+
+            <figure class="space-y-2">
             <div
               class="w-full h-[250px] md:h-[400px] xl:h-[450px] bg-black rounded-lg flex items-center justify-center overflow-hidden"
             >
@@ -41,32 +70,6 @@
             </figcaption>
           </figure>
 
-          <!-- Article Header -->
-          <header class="space-y-2">
-            <h1
-              itemprop="headline"
-              class="text-title text-2xl font-playfair font-bold"
-            >
-              {{ data?.title }}
-            </h1>
-
-            <!-- Author & Category & Date -->
-            <div class="flex items-center gap-2 text-xs">
-              <Author
-                :id="data?.user?.id || 0"
-                :name="data?.user?.display_name || ''"
-                :slug="data?.user?.slug || ''"
-                itemprop="author"
-              />
-              <span class="text-grayscale-40">•</span>
-              <time
-                :datetime="data?.created_at"
-                itemprop="datePublished"
-                class="text-subtitle font-normal"
-              >
-                {{ relativeTime(data?.created_at || "") }}
-              </time>
-            </div>
           </header>
 
           <!-- Article Body -->
@@ -79,9 +82,11 @@
       </section>
 
       <!-- Sidebar -->
-      <aside class="w-full pl-0 xl:pl-4 space-y-10 sticky top-32 self-start">
+      <aside class="w-full pl-0 xl:pl-4 space-y-10  top-32 self-start">
         <!-- <WidgetUpcomingEvent /> -->
         <WidgetLatestNews type="popular" class="pb-5 md:pb-0" />
+        <WidgetSidebarAds />
+        <WidgetSocialMedia />
       </aside>
     </div>
   </ContentContainer>

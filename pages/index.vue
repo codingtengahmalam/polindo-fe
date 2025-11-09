@@ -6,9 +6,10 @@
       </section>
       <section class="w-full pl-0 lg:pl-5 space-y-10">
         <!-- <WidgetUpcomingEvent /> -->
+
         <WidgetLatestNews type="popular" />
-        <WidgetSocialMedia />
         <WidgetSidebarAds />
+        <WidgetSocialMedia />
       </section>
     </div>
   </ContentContainer>
