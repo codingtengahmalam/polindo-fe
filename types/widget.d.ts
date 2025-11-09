@@ -2,26 +2,20 @@
  * Widget and Ads Types
  */
 
-export interface AdContent {
-  image: string;
-  url: string;
-  target: '_blank' | '_self' | '_parent' | '_top';
-  date_start: string;
-  date_end: string;
-}
-
 export interface Ad {
   id: number;
-  lang_id: number;
-  title: string;
-  visible_title: boolean;
-  content: AdContent;
-  type: string;
-  widget_order: number;
-  visibility: boolean;
-  is_custom: number;
-  location: string;
+  ad_title: string;
+  ad_title_visible: string; // "0" or "1"
+  ad_content: string; // Image URL
+  ad_location: string;
+  ad_url: string;
+  ad_status: boolean;
+  ad_source: string;
+  ad_order: number;
+  ad_start: string; // Format: "YYYY-MM-DD HH:mm:ss"
+  ad_expired: string; // Format: "YYYY-MM-DD HH:mm:ss"
   created_at: string;
+  updated_at: string;
 }
 
 export interface AdsListResponse {

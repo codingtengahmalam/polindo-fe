@@ -8,7 +8,7 @@
         <!-- <WidgetUpcomingEvent /> -->
 
         <WidgetLatestNews type="popular" />
-        <WidgetSidebarAds />
+        <WidgetSidebarAds location="global"/>
         <WidgetSocialMedia />
       </section>
     </div>
