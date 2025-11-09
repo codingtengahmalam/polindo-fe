@@ -25,13 +25,21 @@
 
       <div class="flex items-center text-xs gap-1 min-w-0">
         <Author
-          v-if="withAuthor"
+          v-if="withAuthor && !article.custom_author"
           :id="article.author?.id ?? 0"
           :name="article.author?.display_name ?? ''"
           :slug="article.author?.slug ?? ''"
           class="min-w-0 max-w-[60%]"
         />
-        <span v-if="withAuthor && withDate" class="text-grayscale-40 shrink-0">•</span>
+        <Author
+          v-if="withAuthor && article.custom_author"
+          :name="article.custom_author ?? ''"
+          :id="0"
+          :slug="''"
+          :isCustomAuthor="true"
+          class="min-w-0 max-w-[60%]"
+        />
+        <span v-if="(withAuthor && !article.custom_author) || (withAuthor && withDate)" class="text-grayscale-40 shrink-0">•</span>
         <time
           v-if="withDate"
           :datetime="article.created_at"

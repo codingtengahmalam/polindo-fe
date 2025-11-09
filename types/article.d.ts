@@ -76,6 +76,7 @@ export interface Article {
   visibility: boolean;
   pageviews: number;
   tags: ArticleTag[];
+  custom_author: string | null;
   images: ArticleImages | null;
   author: ArticleAuthor | null;
   editor: ArticleEditor | null;

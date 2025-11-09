@@ -25,6 +25,16 @@
               <!-- Author & Category & Date -->
               <div class="flex items-center gap-2 text-xs">
                 <Author
+                  v-if="data?.custom_author"
+                  :id="0"
+                  :name="data?.custom_author || ''"
+                  :slug="''"
+                  :isCustomAuthor="true"
+                  itemprop="author"
+                  />
+
+                <Author
+                  v-else
                   :id="data?.author?.id || 0"
                   :name="data?.author?.display_name || ''"
                   :slug="data?.author?.slug || ''"
