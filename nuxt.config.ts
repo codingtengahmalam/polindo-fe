@@ -24,6 +24,12 @@ export default defineNuxtConfig({
       apiBase: process.env.API_BASE || "https://api.politikindonesia.id",
       dashboardUrl:
         process.env.DASHBOARD_URL || "https://dashboard.politikindonesia.id",
+      socialMedia: {
+        facebook: process.env.NUXT_PUBLIC_SOCIAL_FACEBOOK || "https://www.facebook.com/pages/PolitikIndonesia/113063772047616",
+        instagram: process.env.NUXT_PUBLIC_SOCIAL_INSTAGRAM || "https://www.instagram.com/politikindonesia.id",
+        tiktok: process.env.NUXT_PUBLIC_SOCIAL_TIKTOK || "https://www.tiktok.com/@politikindonesia.id",
+        youtube: process.env.NUXT_PUBLIC_SOCIAL_YOUTUBE || "https://www.youtube.com/@politikindonesia-id",
+      },
     },
   },
 

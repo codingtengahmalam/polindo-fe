@@ -8,6 +8,7 @@
         <!-- <WidgetUpcomingEvent /> -->
         <WidgetLatestNews type="popular" />
         <WidgetSocialMedia />
+        <WidgetSidebarAds />
       </section>
     </div>
   </ContentContainer>
@@ -18,6 +19,7 @@
 <script lang="ts" setup>
 import HeroLatestNews from '~/components/Home/HeroLatestNews.vue';
 import WidgetSocialMedia from '~/components/widget/SocialMedia.vue';
+import WidgetSidebarAds from '~/components/widget/SidebarAds.vue';
 </script>
 
 <style></style>

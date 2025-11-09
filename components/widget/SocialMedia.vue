@@ -45,27 +45,30 @@ interface SocialMediaLink {
   url: string;
 }
 
-// Constants with type safety
+// Get runtime config
+const config = useRuntimeConfig();
+
+// Social media links with URLs from environment variables
 const SOCIAL_MEDIA: readonly SocialMediaLink[] = [
   {
     name: "Facebook",
     icon: FacebookIcon,
-    url: "https://www.facebook.com/pages/PolitikIndonesia/113063772047616",
+    url: config.public.socialMedia.facebook,
   },
   {
     name: "Instagram",
     icon: InstagramIcon,
-    url: "https://www.instagram.com/politikindonesia.id",
+    url: config.public.socialMedia.instagram,
   },
   {
     name: "TikTok",
     icon: TiktokIcon,
-    url: "https://www.tiktok.com/@politikindonesia.id",
+    url: config.public.socialMedia.tiktok,
   },
   {
     name: "YouTube",
     icon: YoutubeIcon,
-    url: "https://www.youtube.com/@politikindonesia-id",
+    url: config.public.socialMedia.youtube,
   }
 ] as const;
 </script>

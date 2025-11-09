@@ -10,6 +10,7 @@ export * from "./video";
 export * from "./tag";
 export * from "./setting";
 export * from "./pages";
+export * from "./widget";
 
 declare global {
   type CustomObject<T = any> = {
