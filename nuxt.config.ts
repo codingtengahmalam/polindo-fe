@@ -96,15 +96,4 @@ export default defineNuxtConfig({
       },
     ],
   },
-
-  // Nitro configuration for Netlify deployment
-  nitro: {
-    // Use Netlify preset for SSR deployment
-    preset: process.env.NITRO_PRESET || (process.env.NETLIFY ? "netlify" : "node-server"),
-    // Ensure proper output for Netlify Functions
-    output: {
-      serverDir: ".output/server",
-      publicDir: ".output/public",
-    },
-  },
 });
