@@ -187,11 +187,14 @@ watch(
 );
 
 // Prevent body scroll when menu is open
+// Only run on client side to prevent hydration mismatches
 watch(isMenuOpen, (isOpen) => {
-  if (isOpen) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "";
+  if (process.client) {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
   }
 });
 

@@ -96,12 +96,14 @@ useHead({
   ],
 
   // Google Analytics
+  // Use type: 'text/javascript' to ensure proper execution
   script: [
     {
       src: "https://www.googletagmanager.com/gtag/js?id=G-8L8HDXF7VJ",
       async: true,
     },
     {
+      type: "text/javascript",
       innerHTML: `
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
