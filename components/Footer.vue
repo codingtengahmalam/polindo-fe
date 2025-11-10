@@ -6,10 +6,10 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-white">
           <!-- Company Info & Contact -->
           <div class="space-y-5">
-            <NuxtLink to="/" aria-label="Go to homepage">
+            <NuxtLink to="/" :aria-label="settings?.site_title ?? 'Go to homepage'">
               <img
-                src="/logo.png"
-                alt="Politik Indonesia - Jaringan Informasi Politik"
+                :src="logoUrl"
+                :alt="settings?.site_title ?? 'Politik Indonesia - Jaringan Informasi Politik'"
                 height="48"
                 class="h-12 w-auto"
               />
@@ -53,7 +53,7 @@
           <!-- App Download Links -->
           <div class="space-y-4">
             <h2 class="text-sm font-semibold uppercase text-[#E5E8E8]">
-              Unduh Aplikasi POLINDO
+              Unduh Aplikasi {{ settings?.site_title ?? 'Politik Indonesia' }}
             </h2>
             <div class="flex flex-row md:flex-col gap-3">
               <a
@@ -113,7 +113,7 @@
           class="text-center md:text-right text-xs md:text-sm text-[#E5E8E8]"
         >
           <p>
-            &copy; {{ currentYear }} Politik Indonesia. All rights reserved.
+            &copy; {{ currentYear }} {{ settings?.site_title ?? 'Politik Indonesia' }}. All rights reserved.
           </p>
         </div>
       </ContentContainer>
@@ -132,6 +132,7 @@ import GooglePlayIcon from "~/assets/playstore.png";
 import type { Page, PagesListResponse } from "~/types";
 
 const { settings } = useSettings();
+const config = useRuntimeConfig();
 const pages = ref<Page[]>([]);
 const pagesState = useState<PagesListResponse | null>("pages-state", () => null);
 
@@ -156,47 +157,68 @@ interface AppLink {
 // Reactive state
 const currentYear = new Date().getFullYear();
 
-// Constants with type safety
-const SOCIAL_MEDIA: readonly SocialMediaLink[] = [
+// Social media links with fallback: Settings (API) -> RuntimeConfig (env) -> Hardcoded defaults
+const SOCIAL_MEDIA = computed<SocialMediaLink[]>(() => [
   {
     name: "Facebook",
     icon: FacebookIcon,
-    url: "https://www.facebook.com/pages/PolitikIndonesia/113063772047616",
+    url:
+      settings.value?.facebook_url ||
+      config.public.socialMedia.facebook ||
+      "https://www.facebook.com/pages/PolitikIndonesia/113063772047616",
   },
   {
     name: "Instagram",
     icon: InstagramIcon,
-    url: "https://www.instagram.com/politikindonesia.id",
+    url:
+      settings.value?.instagram_url ||
+      config.public.socialMedia.instagram ||
+      "https://www.instagram.com/politikindonesia.id",
   },
   {
     name: "TikTok",
     icon: TiktokIcon,
-    url: "https://www.tiktok.com/@politikindonesia.id",
+    url:
+      config.public.socialMedia.tiktok ||
+      "https://www.tiktok.com/@politikindonesia.id",
   },
   {
     name: "YouTube",
     icon: YoutubeIcon,
-    url: "https://www.youtube.com/@politikindonesia-id",
+    url:
+      settings.value?.youtube_url ||
+      config.public.socialMedia.youtube ||
+      "https://www.youtube.com/@politikindonesia-id",
   },
   {
     name: "RSS Feed",
     icon: RSSIcon,
     url: "/rss",
   },
-] as const;
+]);
 
-const APPS: readonly AppLink[] = [
+// App download links with fallback: Settings (API) -> Hardcoded defaults
+const APPS = computed<AppLink[]>(() => [
   {
     name: "Google Play",
     icon: GooglePlayIcon,
-    url: settings.value?.android_download_link ?? "https://play.google.com/store/apps/details?id=id.polindo.android",
+    url:
+      settings.value?.android_download_link ||
+      "https://play.google.com/store/apps/details?id=id.polindo.android",
   },
   {
     name: "App Store",
     icon: AppStoreIcon,
-    url: settings.value?.android_download_link ?? "https://play.google.com/store/apps/details?id=id.polindo.android", // response not provide ios link
+    url:
+      settings.value?.android_download_link ||
+      "https://play.google.com/store/apps/details?id=id.polindo.android", // response not provide ios link
   },
-] as const;
+]);
+
+// Logo URL with fallback: RuntimeConfig (env) -> Hardcoded default
+const logoUrl = computed<string>(() => {
+  return (config.public.logoUrl as string) || "/logo.png";
+});
 
 async function getPages() {
   try {

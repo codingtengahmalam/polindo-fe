@@ -11,10 +11,10 @@
         <!-- Left Side: Logo & Menu -->
         <div class="flex items-center gap-4 xl:gap-6">
           <!-- Logo -->
-          <NuxtLink to="/" aria-label="Politik Indonesia Home" class="shrink-0">
+          <NuxtLink to="/" :aria-label="settings?.site_title ?? 'Politik Indonesia Home'" class="shrink-0">
             <img
-              src="/logo.png"
-              alt="Politik Indonesia - Jaringan Informasi Politik"
+              :src="logoUrl"
+              :alt="settings?.site_title ?? 'Politik Indonesia - Jaringan Informasi Politik'"
               width="160"
               height="40"
               class="w-auto h-8 md:h-9 xl:h-10"
@@ -133,8 +133,14 @@ const MOBILE_MENU_Z_INDEX = "z-40";
 const BACKDROP_Z_INDEX = "z-30";
 
 // Composables
+const { settings } = useSettings();
 const route = useRoute();
 const config = useRuntimeConfig();
+
+// Logo URL with fallback: RuntimeConfig (env) -> Hardcoded default
+const logoUrl = computed<string>(() => {
+  return (config.public.logoUrl as string) || "/logo.png";
+});
 
 const { data: categories, error } = await useFetch<CategoryListResponse>(
   `${config.public.apiBase}/api/v1/categories?show_on_menu=true`,
