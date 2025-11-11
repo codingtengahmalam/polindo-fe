@@ -38,6 +38,9 @@ export interface Setting {
   android_download_link: string;
   fcm_key: string;
   fcm_topic: string;
+  logo_url: string;
+  favicon_url: string;
+  dashboard_url: string;
   created_at: any;
   updated_at: any;
 }

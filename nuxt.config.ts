@@ -25,6 +25,7 @@ export default defineNuxtConfig({
       dashboardUrl:
         process.env.DASHBOARD_URL || "https://dashboard.politikindonesia.id",
       logoUrl: process.env.NUXT_PUBLIC_LOGO_URL || "/logo.png",
+      videoCarousel: process.env.VIDEO_CAROUSEL === "true",
       socialMedia: {
         facebook: process.env.NUXT_PUBLIC_SOCIAL_FACEBOOK || "https://www.facebook.com/pages/PolitikIndonesia/113063772047616",
         instagram: process.env.NUXT_PUBLIC_SOCIAL_INSTAGRAM || "https://www.instagram.com/politikindonesia.id",

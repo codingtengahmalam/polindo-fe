@@ -217,7 +217,7 @@ const APPS = computed<AppLink[]>(() => [
 
 // Logo URL with fallback: RuntimeConfig (env) -> Hardcoded default
 const logoUrl = computed<string>(() => {
-  return (config.public.logoUrl as string) || "/logo.png";
+  return (settings.value?.logo_url as string) || "/logo.png";
 });
 
 async function getPages() {

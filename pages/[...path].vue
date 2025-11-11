@@ -1,6 +1,6 @@
 <template>
   <ContentContainer class="px-4 md:px-10 xl:px-20 space-y-5">
-    <div class="flex flex-col xl:flex-row xl:items-start justify-between pt-10">
+    <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between pt-10">
       <section
         class="w-full xl:w-[750px] xl:shrink-0 space-y-8 xl:pr-5 xl:border-r border-grayscale-10"
       >

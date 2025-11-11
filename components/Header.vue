@@ -139,8 +139,13 @@ const config = useRuntimeConfig();
 
 // Logo URL with fallback: RuntimeConfig (env) -> Hardcoded default
 const logoUrl = computed<string>(() => {
-  return (config.public.logoUrl as string) || "/logo.png";
+  return (settings.value?.logo_url as string) || "/logo.png";
 });
+
+const dashboardUrl = computed<string>(() => {
+  return (settings.value?.dashboard_url as string) || "#";
+});
+
 
 const { data: categories, error } = await useFetch<CategoryListResponse>(
   `${config.public.apiBase}/api/v1/categories?show_on_menu=true`,

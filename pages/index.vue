@@ -13,7 +13,9 @@
       </section>
     </div>
   </ContentContainer>
-  <HomeVideoCarousel />
+
+  <HomeVideoCarousel v-if="config.public.videoCarousel" />
+
   <HomeCategory />
 </template>
 
@@ -21,6 +23,8 @@
 import HeroLatestNews from '~/components/Home/HeroLatestNews.vue';
 import WidgetSocialMedia from '~/components/widget/SocialMedia.vue';
 import WidgetSidebarAds from '~/components/widget/SidebarAds.vue';
+
+const config = useRuntimeConfig();
 </script>
 
 <style></style>
